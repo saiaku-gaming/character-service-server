@@ -14,23 +14,23 @@ import lombok.NoArgsConstructor;
 @Table(name = "character")
 public class Character {
 
-    @Id
-    @Column(unique = true, name = "character_name")
-    private String characterName;
+	@Id
+	@Column(unique = true, name = "character_name")
+	private String characterName;
 
-    @Column()
-    private String owner;
-    
-    @Column(unique = true, name = "display_character_name")
-    private String displayCharacterName;
+	@Column(name = "owner")
+	private String ownerUsername;
 
-    @Column(name = "chest_item")
-    private String chestItem;
-    
-    @Column(name = "mainhand_armament")
-    private String mainhandArmament;
-    
-    @Column(name = "off_hand_armament")
-    private String offHandArmament;
-    
+	@Column(unique = true, name = "display_character_name")
+	private String displayCharacterName;
+
+	@Column(name = "chest_item")
+	private String chestItem;
+
+	@Column(name = "mainhand_armament")
+	private String mainhandArmament;
+
+	@Column(name = "off_hand_armament")
+	private String offHandArmament;
+
 }
