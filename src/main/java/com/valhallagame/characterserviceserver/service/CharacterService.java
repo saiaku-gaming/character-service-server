@@ -21,15 +21,15 @@ public class CharacterService {
 	public Optional<Character> getCharacter(String characterName) {
 		return characterRepository.findByCharacterName(characterName.toLowerCase());
 	}
-	
+
 	public List<Character> getCharacters(String username) {
-		return characterRepository.findByOwner(username.toLowerCase());
+		return characterRepository.findByOwnerUsername(username.toLowerCase());
 	}
 
 	public void setSelectedCharacter(String owner, String characterName) {
 		characterRepository.setSelectedCharacter(owner.toLowerCase(), characterName.toLowerCase());
 	}
-	
+
 	public Optional<Character> getSelectedCharacter(String owner) {
 		return characterRepository.getSelectedCharacter(owner.toLowerCase());
 	}
