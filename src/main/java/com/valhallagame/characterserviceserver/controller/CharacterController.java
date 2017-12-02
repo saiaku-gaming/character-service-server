@@ -1,5 +1,6 @@
 package com.valhallagame.characterserviceserver.controller;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import com.valhallagame.characterserviceserver.message.UsernameParameter;
 import com.valhallagame.characterserviceserver.model.Character;
 import com.valhallagame.characterserviceserver.service.CharacterService;
 import com.valhallagame.common.JS;
+import com.valhallagame.wardrobeserviceclient.WardrobeServiceClient;
 
 @Controller
 @RequestMapping(path = "/v1/character")
@@ -48,18 +50,25 @@ public class CharacterController {
 
 	@RequestMapping(path = "/create", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<?> create(@RequestBody CharacterNameAndOwnerUsernameParameter characterData) {
+	public ResponseEntity<?> create(@RequestBody CharacterNameAndOwnerUsernameParameter characterData) throws IOException {
 		System.out.println("CREATE!!");
 		String charName = characterData.getCharacterName();
 		Optional<Character> localOpt = characterService.getCharacter(charName);
 		if (!localOpt.isPresent()) {
 			Character c = new Character();
 			c.setOwnerUsername(characterData.getOwnerUsername());
-			c.setDisplayCharacterName(characterData.getCharacterName());
-			c.setCharacterName(characterData.getCharacterName().toLowerCase());
+			c.setDisplayCharacterName(charName);
+			String charNameLower = characterData.getCharacterName().toLowerCase();
+			c.setCharacterName(charNameLower);
 			c.setChestItem("LeatherArmor");
 			c.setMainhandArmament("Sword");
 			c.setOffHandArmament("MediumShield");
+			
+			WardrobeServiceClient wardrobeServiceClient = WardrobeServiceClient.get();
+			wardrobeServiceClient.addWardrobeItem(charNameLower, "LeatherArmor");
+			wardrobeServiceClient.addWardrobeItem(charNameLower, "Sword");
+			wardrobeServiceClient.addWardrobeItem(charNameLower, "MediumShield");
+			
 			c = characterService.saveCharacter(c);
 			characterService.setSelectedCharacter(c.getOwnerUsername(), c.getCharacterName());
 		} else {
