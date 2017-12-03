@@ -31,7 +31,17 @@ public class CharacterController {
 	@Autowired
 	private CharacterService characterService;
 
-	@RequestMapping(path = "/get", method = RequestMethod.POST)
+	@RequestMapping(path = "/get-character-without-owner-validation", method = RequestMethod.POST)
+	@ResponseBody
+	public ResponseEntity<?> getCharacterWithoutOwnerValidation(@RequestBody CharacterNameParameter character) {
+		Optional<Character> optcharacter = characterService.getCharacter(character.getCharacterName());
+		if (!optcharacter.isPresent()) {
+			return JS.message(HttpStatus.NOT_FOUND, "No character with that character name was found!");
+		}
+		return JS.message(HttpStatus.OK, optcharacter.get());
+	}
+	
+	@RequestMapping(path = "/get-character", method = RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<?> getCharacter(@RequestBody CharacterNameAndOwnerUsernameParameter characterAndOwner) {
 		Optional<Character> optcharacter = characterService.getCharacter(characterAndOwner.getCharacterName());
