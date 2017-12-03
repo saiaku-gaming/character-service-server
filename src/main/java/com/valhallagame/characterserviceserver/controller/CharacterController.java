@@ -1,6 +1,8 @@
 package com.valhallagame.characterserviceserver.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +16,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.valhallagame.characterserviceserver.message.CharacterNameAndOwnerUsernameParameter;
 import com.valhallagame.characterserviceserver.message.CharacterNameParameter;
+import com.valhallagame.characterserviceserver.message.SavedEquippedItemsParameter;
 import com.valhallagame.characterserviceserver.message.UsernameParameter;
 import com.valhallagame.characterserviceserver.model.Character;
 import com.valhallagame.characterserviceserver.service.CharacterService;
 import com.valhallagame.common.JS;
+import com.valhallagame.common.RestResponse;
 import com.valhallagame.wardrobeserviceclient.WardrobeServiceClient;
 
 @Controller
@@ -143,6 +147,55 @@ public class CharacterController {
 			return JS.message(HttpStatus.OK, selectedCharacter.get());
 		} else {
 			return JS.message(HttpStatus.NOT_FOUND, "No character selected");
+		}
+	}
+	
+	@RequestMapping(path = "/save-equipped-items", method = RequestMethod.POST)
+	@ResponseBody
+	public ResponseEntity<?> saveEquippedItems(@RequestBody SavedEquippedItemsParameter input) throws IOException{
+		Optional<Character> selectedCharacterOpt = characterService.getCharacter(input.getCharacterName());
+		if(selectedCharacterOpt.isPresent()) {
+			Character character = selectedCharacterOpt.get();
+			WardrobeServiceClient wardrobeServiceClient = WardrobeServiceClient.get();
+			RestResponse<List<String>> wardrobeItems = wardrobeServiceClient.getWardrobeItems(character.getCharacterName());
+			
+			List<String> items = wardrobeItems.getResponse().orElse(new ArrayList<String>());
+			for (SavedEquippedItemsParameter.EquippedItem equippedItem : input.getEquippedItems()) {
+				
+				String armament = equippedItem.getArmament();
+				String armor = equippedItem.getArmor();
+				
+				switch(equippedItem.getItemSlot()) {
+				case "Main Hand":
+					if(armament != null) {
+						if(!items.contains(armament)) {
+							System.err.println("wardrobe does not have armament" + armament + " in " + items);
+						} else {
+							character.setMainhandArmament(armament);
+						}
+					}
+				case "Offhand":
+					if(armament != null) {
+						if(!items.contains(armament)) {
+							System.err.println("wardrobe does not have armament" + armament + " in " + items);
+						} else {
+							character.setOffHandArmament(armament);
+						}
+					}
+				case "Chest":
+					if(armor != null) {
+						if( !items.contains(armor)) {
+							System.err.println("wardrobe does not have armor " + armor + " in " + items);
+						} else {
+							character.setChestItem(armor);
+						}
+					}
+				}
+			}
+			Character saveCharacter = characterService.saveCharacter(character);
+			return JS.message(HttpStatus.OK, saveCharacter);
+		} else {
+			return JS.message(HttpStatus.NOT_FOUND, "No character with that id");
 		}
 	}
 
