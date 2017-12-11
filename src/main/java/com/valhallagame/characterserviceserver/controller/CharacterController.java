@@ -74,12 +74,12 @@ public class CharacterController {
 			c.setDisplayCharacterName(charName);
 			String charNameLower = characterData.getCharacterName().toLowerCase();
 			c.setCharacterName(charNameLower);
-			c.setChestItem("LeatherArmor");
+			c.setChestItem("Leather_Armor");
 			c.setMainhandArmament("Sword");
-			c.setOffHandArmament("MediumShield");
+			c.setOffHandArmament("Medium_Shield");
 			
 			WardrobeServiceClient wardrobeServiceClient = WardrobeServiceClient.get();
-			wardrobeServiceClient.addWardrobeItem(charNameLower, "LeatherArmor");
+			wardrobeServiceClient.addWardrobeItem(charNameLower, "Leather_Armor");
 			wardrobeServiceClient.addWardrobeItem(charNameLower, "Sword");
 			wardrobeServiceClient.addWardrobeItem(charNameLower, "MediumShield");
 			
