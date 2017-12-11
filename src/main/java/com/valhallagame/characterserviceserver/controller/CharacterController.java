@@ -81,7 +81,7 @@ public class CharacterController {
 			WardrobeServiceClient wardrobeServiceClient = WardrobeServiceClient.get();
 			wardrobeServiceClient.addWardrobeItem(charNameLower, "Leather_Armor");
 			wardrobeServiceClient.addWardrobeItem(charNameLower, "Sword");
-			wardrobeServiceClient.addWardrobeItem(charNameLower, "MediumShield");
+			wardrobeServiceClient.addWardrobeItem(charNameLower, "Medium_Shield");
 			
 			c = characterService.saveCharacter(c);
 			characterService.setSelectedCharacter(c.getOwnerUsername(), c.getCharacterName());
@@ -176,7 +176,7 @@ public class CharacterController {
 				String armor = equippedItem.getArmor();
 				
 				switch(equippedItem.getItemSlot()) {
-				case "Main Hand":
+				case "Mainhand":
 					if(armament != null) {
 						if(!items.contains(armament)) {
 							System.err.println("wardrobe does not have armament" + armament + " in " + items);
