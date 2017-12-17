@@ -20,5 +20,4 @@ public class App {
             container.setPort(DefaultServicePortMappings.CHARACTER_SERVICE_PORT);
         });
     }
-
 }
