@@ -65,8 +65,11 @@ public class CharacterController {
 	@RequestMapping(path = "/create", method = RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<?> create(@RequestBody CharacterNameAndOwnerUsernameParameter characterData) throws IOException {
-		System.out.println("CREATE!!");
+
 		String charName = characterData.getCharacterName();
+		if (charName.contains("#")) {
+			return JS.message(HttpStatus.BAD_REQUEST, "# is not allowed in character name");
+		}
 		Optional<Character> localOpt = characterService.getCharacter(charName);
 		if (!localOpt.isPresent()) {
 			Character c = new Character();
@@ -124,6 +127,11 @@ public class CharacterController {
 		if (input.getCharacterName() == null || input.getCharacterName().isEmpty()) {
 			return JS.message(HttpStatus.BAD_REQUEST, "Missing characterName field");
 		}
+		
+		if (input.getCharacterName().contains("#")) {
+			return JS.message(HttpStatus.BAD_REQUEST, "# is not allowed in character name");
+		}
+		
 		Optional<Character> localOpt = characterService.getCharacter(input.getCharacterName());
 		if (localOpt.isPresent()) {
 			return JS.message(HttpStatus.CONFLICT, "Character not available");
