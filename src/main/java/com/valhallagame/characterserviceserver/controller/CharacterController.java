@@ -61,6 +61,23 @@ public class CharacterController {
 	public ResponseEntity<?> getAll(@RequestBody UsernameParameter username) {
 		return JS.message(HttpStatus.OK, characterService.getCharacters(username.getUsername()));
 	}
+	
+	
+	@RequestMapping(path = "/create-debug-character", method = RequestMethod.POST)
+	@ResponseBody
+	public ResponseEntity<?> createDebugCharacter(@RequestBody CharacterNameAndOwnerUsernameParameter characterData) throws IOException {
+		String charName = characterData.getCharacterName();
+		Optional<Character> localOpt = characterService.getCharacter(charName);
+		if (!localOpt.isPresent()) {
+			return create(characterData);
+		} else {
+			Character character = localOpt.get();
+			character.setOwnerUsername(characterData.getOwnerUsername());
+			characterService.saveCharacter(character);
+		}
+		return JS.message(HttpStatus.OK, "OK");
+	}
+	
 
 	@RequestMapping(path = "/create", method = RequestMethod.POST)
 	@ResponseBody
