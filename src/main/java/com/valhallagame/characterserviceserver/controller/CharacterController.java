@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,7 +41,7 @@ public class CharacterController {
 
 	@RequestMapping(path = "/get-character-without-owner-validation", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<?> getCharacterWithoutOwnerValidation(@RequestBody CharacterNameParameter character) {
+	public ResponseEntity<?> getCharacterWithoutOwnerValidation(@Valid @RequestBody CharacterNameParameter character) {
 		Optional<Character> optcharacter = characterService.getCharacter(character.getCharacterName());
 		if (!optcharacter.isPresent()) {
 			return JS.message(HttpStatus.NOT_FOUND, "No character with that character name was found!");
@@ -66,6 +68,22 @@ public class CharacterController {
 	@ResponseBody
 	public ResponseEntity<?> getAll(@RequestBody UsernameParameter username) {
 		return JS.message(HttpStatus.OK, characterService.getCharacters(username.getUsername()));
+	}
+
+	@RequestMapping(path = "/create-debug-character", method = RequestMethod.POST)
+	@ResponseBody
+	public ResponseEntity<?> createDebugCharacter(@RequestBody CharacterNameAndOwnerUsernameParameter characterData)
+			throws IOException {
+		String charName = characterData.getCharacterName();
+		Optional<Character> localOpt = characterService.getCharacter(charName);
+		if (!localOpt.isPresent()) {
+			return create(characterData);
+		} else {
+			Character character = localOpt.get();
+			character.setOwnerUsername(characterData.getOwnerUsername());
+			characterService.saveCharacter(character);
+		}
+		return JS.message(HttpStatus.OK, "OK");
 	}
 
 	@RequestMapping(path = "/create", method = RequestMethod.POST)
