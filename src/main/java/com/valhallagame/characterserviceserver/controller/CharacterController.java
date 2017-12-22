@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,8 @@ import com.valhallagame.characterserviceserver.model.Character;
 import com.valhallagame.characterserviceserver.service.CharacterService;
 import com.valhallagame.common.JS;
 import com.valhallagame.common.RestResponse;
+import com.valhallagame.common.rabbitmq.NotificationMessage;
+import com.valhallagame.common.rabbitmq.RabbitMQRouting;
 import com.valhallagame.wardrobeserviceclient.WardrobeServiceClient;
 
 @Controller
@@ -30,6 +33,9 @@ public class CharacterController {
 
 	@Autowired
 	private CharacterService characterService;
+
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
 
 	@RequestMapping(path = "/get-character-without-owner-validation", method = RequestMethod.POST)
 	@ResponseBody
@@ -40,7 +46,7 @@ public class CharacterController {
 		}
 		return JS.message(HttpStatus.OK, optcharacter.get());
 	}
-	
+
 	@RequestMapping(path = "/get-character", method = RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<?> getCharacter(@RequestBody CharacterNameAndOwnerUsernameParameter characterAndOwner) {
@@ -64,7 +70,8 @@ public class CharacterController {
 
 	@RequestMapping(path = "/create", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<?> create(@RequestBody CharacterNameAndOwnerUsernameParameter characterData) throws IOException {
+	public ResponseEntity<?> create(@RequestBody CharacterNameAndOwnerUsernameParameter characterData)
+			throws IOException {
 
 		String charName = characterData.getCharacterName();
 		if (charName.contains("#")) {
@@ -80,12 +87,12 @@ public class CharacterController {
 			c.setChestItem("Leather_Armor");
 			c.setMainhandArmament("Sword");
 			c.setOffHandArmament("Medium_Shield");
-			
+
 			WardrobeServiceClient wardrobeServiceClient = WardrobeServiceClient.get();
 			wardrobeServiceClient.addWardrobeItem(charNameLower, "Leather_Armor");
 			wardrobeServiceClient.addWardrobeItem(charNameLower, "Sword");
 			wardrobeServiceClient.addWardrobeItem(charNameLower, "Medium_Shield");
-			
+
 			c = characterService.saveCharacter(c);
 			characterService.setSelectedCharacter(c.getOwnerUsername(), c.getCharacterName());
 		} else {
@@ -115,6 +122,13 @@ public class CharacterController {
 				});
 			}
 			characterService.deleteCharacter(local);
+
+			NotificationMessage notificationMessage = new NotificationMessage("", "A character was deleted");
+			notificationMessage.addData("characterName", local.getCharacterName());
+
+			rabbitTemplate.convertAndSend(RabbitMQRouting.Exchange.CHARACTER.name(),
+					RabbitMQRouting.Character.DELETE.name(), notificationMessage);
+
 			return JS.message(HttpStatus.OK, "Deleted character");
 		} else {
 			return JS.message(HttpStatus.FORBIDDEN, "No access");
@@ -127,11 +141,11 @@ public class CharacterController {
 		if (input.getCharacterName() == null || input.getCharacterName().isEmpty()) {
 			return JS.message(HttpStatus.BAD_REQUEST, "Missing characterName field");
 		}
-		
+
 		if (input.getCharacterName().contains("#")) {
 			return JS.message(HttpStatus.BAD_REQUEST, "# is not allowed in character name");
 		}
-		
+
 		Optional<Character> localOpt = characterService.getCharacter(input.getCharacterName());
 		if (localOpt.isPresent()) {
 			return JS.message(HttpStatus.CONFLICT, "Character not available");
@@ -167,42 +181,43 @@ public class CharacterController {
 			return JS.message(HttpStatus.NOT_FOUND, "No character selected");
 		}
 	}
-	
+
 	@RequestMapping(path = "/save-equipped-items", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<?> saveEquippedItems(@RequestBody SavedEquippedItemsParameter input) throws IOException{
+	public ResponseEntity<?> saveEquippedItems(@RequestBody SavedEquippedItemsParameter input) throws IOException {
 		Optional<Character> selectedCharacterOpt = characterService.getCharacter(input.getCharacterName());
-		if(selectedCharacterOpt.isPresent()) {
+		if (selectedCharacterOpt.isPresent()) {
 			Character character = selectedCharacterOpt.get();
 			WardrobeServiceClient wardrobeServiceClient = WardrobeServiceClient.get();
-			RestResponse<List<String>> wardrobeItems = wardrobeServiceClient.getWardrobeItems(character.getCharacterName());
-			
+			RestResponse<List<String>> wardrobeItems = wardrobeServiceClient
+					.getWardrobeItems(character.getCharacterName());
+
 			List<String> items = wardrobeItems.getResponse().orElse(new ArrayList<String>());
 			for (SavedEquippedItemsParameter.EquippedItem equippedItem : input.getEquippedItems()) {
-				
+
 				String armament = equippedItem.getArmament();
 				String armor = equippedItem.getArmor();
-				
-				switch(equippedItem.getItemSlot()) {
+
+				switch (equippedItem.getItemSlot()) {
 				case "Mainhand":
-					if(armament != null) {
-						if(!items.contains(armament)) {
+					if (armament != null) {
+						if (!items.contains(armament)) {
 							System.err.println("wardrobe does not have armament" + armament + " in " + items);
 						} else {
 							character.setMainhandArmament(armament);
 						}
 					}
 				case "Offhand":
-					if(armament != null) {
-						if(!items.contains(armament)) {
+					if (armament != null) {
+						if (!items.contains(armament)) {
 							System.err.println("wardrobe does not have armament" + armament + " in " + items);
 						} else {
 							character.setOffHandArmament(armament);
 						}
 					}
 				case "Chest":
-					if(armor != null) {
-						if( !items.contains(armor)) {
+					if (armor != null) {
+						if (!items.contains(armor)) {
 							System.err.println("wardrobe does not have armor " + armor + " in " + items);
 						} else {
 							character.setChestItem(armor);
