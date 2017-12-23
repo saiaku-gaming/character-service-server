@@ -7,6 +7,8 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,8 @@ import com.valhallagame.wardrobeserviceclient.WardrobeServiceClient;
 @RequestMapping(path = "/v1/character")
 public class CharacterController {
 
+	private static final Logger logger = LoggerFactory.getLogger(CharacterController.class);
+
 	@Autowired
 	private CharacterService characterService;
 
@@ -42,6 +46,7 @@ public class CharacterController {
 	@RequestMapping(path = "/get-character-without-owner-validation", method = RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<?> getCharacterWithoutOwnerValidation(@Valid @RequestBody CharacterNameParameter character) {
+
 		Optional<Character> optcharacter = characterService.getCharacter(character.getCharacterName());
 		if (!optcharacter.isPresent()) {
 			return JS.message(HttpStatus.NOT_FOUND, "No character with that character name was found!");
@@ -212,41 +217,45 @@ public class CharacterController {
 
 			List<String> items = wardrobeItems.getResponse().orElse(new ArrayList<String>());
 			for (SavedEquippedItemsParameter.EquippedItem equippedItem : input.getEquippedItems()) {
-
-				String armament = equippedItem.getArmament();
-				String armor = equippedItem.getArmor();
-
-				switch (equippedItem.getItemSlot()) {
-				case "Mainhand":
-					if (armament != null) {
-						if (!items.contains(armament)) {
-							System.err.println("wardrobe does not have armament" + armament + " in " + items);
-						} else {
-							character.setMainhandArmament(armament);
-						}
-					}
-				case "Offhand":
-					if (armament != null) {
-						if (!items.contains(armament)) {
-							System.err.println("wardrobe does not have armament" + armament + " in " + items);
-						} else {
-							character.setOffHandArmament(armament);
-						}
-					}
-				case "Chest":
-					if (armor != null) {
-						if (!items.contains(armor)) {
-							System.err.println("wardrobe does not have armor " + armor + " in " + items);
-						} else {
-							character.setChestItem(armor);
-						}
-					}
-				}
+				equippCharacter(character, items, equippedItem);
 			}
 			Character saveCharacter = characterService.saveCharacter(character);
 			return JS.message(HttpStatus.OK, saveCharacter);
 		} else {
 			return JS.message(HttpStatus.NOT_FOUND, "No character with that id");
+		}
+	}
+
+	private void equippCharacter(Character character, List<String> items,
+			SavedEquippedItemsParameter.EquippedItem equippedItem) {
+		String armament = equippedItem.getArmament();
+		String armor = equippedItem.getArmor();
+		String itemSlot = equippedItem.getItemSlot();
+		switch (itemSlot) {
+		case "Mainhand":
+			if (items.contains(armament)) {
+				character.setMainhandArmament(armament);
+			} else {
+				logger.error("wardrobe does not have armament {} in {} ", armament, items);
+			}
+			break;
+		case "Offhand":
+			if (items.contains(armament)) {
+				character.setOffHandArmament(armament);
+			} else {
+				logger.error("wardrobe does not have armament {} in {}", armament, items);
+			}
+			break;
+		case "Chest":
+			if (items.contains(armor)) {
+				character.setChestItem(armor);
+			} else {
+				logger.error("wardrobe does not have armor {} in {}", armor, items);
+			}
+			break;
+		default:
+			logger.error("{} DOES NOT EXIST AS A SLOT!", itemSlot);
+			break;
 		}
 	}
 
