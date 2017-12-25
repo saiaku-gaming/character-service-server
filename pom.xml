@@ -91,6 +91,11 @@
 			<artifactId>wardrobe-service-client</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>com.valhallagame.valhalla</groupId>
+			<artifactId>character-service-client</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

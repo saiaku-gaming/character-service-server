@@ -20,10 +20,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.valhallagame.characterserviceserver.message.CharacterNameAndOwnerUsernameParameter;
-import com.valhallagame.characterserviceserver.message.CharacterNameParameter;
-import com.valhallagame.characterserviceserver.message.SavedEquippedItemsParameter;
-import com.valhallagame.characterserviceserver.message.UsernameParameter;
+import com.valhallagame.characterserviceclient.message.CharacterNameAndOwnerUsernameParameter;
+import com.valhallagame.characterserviceclient.message.CharacterNameParameter;
+import com.valhallagame.characterserviceclient.message.EqippedItemsParameter;
+import com.valhallagame.characterserviceclient.message.EquippedItem;
+import com.valhallagame.characterserviceclient.message.UsernameParameter;
 import com.valhallagame.characterserviceserver.model.Character;
 import com.valhallagame.characterserviceserver.service.CharacterService;
 import com.valhallagame.common.JS;
@@ -57,7 +58,7 @@ public class CharacterController {
 
 	@RequestMapping(path = "/get-character", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<JsonNode> getCharacter(@RequestBody CharacterNameAndOwnerUsernameParameter characterAndOwner) {
+	public ResponseEntity<JsonNode> getCharacter(@Valid @RequestBody CharacterNameAndOwnerUsernameParameter characterAndOwner) {
 		Optional<Character> optcharacter = characterService.getCharacter(characterAndOwner.getCharacterName());
 		if (!optcharacter.isPresent()) {
 			return JS.message(HttpStatus.NOT_FOUND, "No character with that character name was found!");
@@ -72,13 +73,13 @@ public class CharacterController {
 
 	@RequestMapping(path = "/get-all", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<JsonNode> getAll(@RequestBody UsernameParameter username) {
+	public ResponseEntity<JsonNode> getAll(@Valid @RequestBody UsernameParameter username) {
 		return JS.message(HttpStatus.OK, characterService.getCharacters(username.getUsername()));
 	}
 
 	@RequestMapping(path = "/create-debug-character", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<JsonNode> createDebugCharacter(@RequestBody CharacterNameAndOwnerUsernameParameter characterData)
+	public ResponseEntity<JsonNode> createDebugCharacter(@Valid @RequestBody CharacterNameAndOwnerUsernameParameter characterData)
 			throws IOException {
 		String charName = characterData.getCharacterName();
 		Optional<Character> localOpt = characterService.getCharacter(charName);
@@ -94,7 +95,7 @@ public class CharacterController {
 
 	@RequestMapping(path = "/create", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<JsonNode> create(@RequestBody CharacterNameAndOwnerUsernameParameter characterData)
+	public ResponseEntity<JsonNode> create(@Valid @RequestBody CharacterNameAndOwnerUsernameParameter characterData)
 			throws IOException {
 
 		String charName = characterData.getCharacterName();
@@ -127,7 +128,7 @@ public class CharacterController {
 
 	@RequestMapping(path = "/delete", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<JsonNode> delete(@RequestBody CharacterNameAndOwnerUsernameParameter characterAndOwner) {
+	public ResponseEntity<JsonNode> delete(@Valid @RequestBody CharacterNameAndOwnerUsernameParameter characterAndOwner) {
 		String owner = characterAndOwner.getOwnerUsername();
 		Optional<Character> localOpt = characterService.getCharacter(characterAndOwner.getCharacterName());
 		if (!localOpt.isPresent()) {
@@ -161,7 +162,7 @@ public class CharacterController {
 
 	@RequestMapping(path = "/character-available", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<JsonNode> characterAvailable(@RequestBody CharacterNameParameter input) {
+	public ResponseEntity<JsonNode> characterAvailable(@Valid @RequestBody CharacterNameParameter input) {
 		if (input.getCharacterName() == null || input.getCharacterName().isEmpty()) {
 			return JS.message(HttpStatus.BAD_REQUEST, "Missing characterName field");
 		}
@@ -180,7 +181,7 @@ public class CharacterController {
 
 	@RequestMapping(path = "/select-character", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<JsonNode> selectCharacter(@RequestBody CharacterNameAndOwnerUsernameParameter characterAndOwner) {
+	public ResponseEntity<JsonNode> selectCharacter(@Valid @RequestBody CharacterNameAndOwnerUsernameParameter characterAndOwner) {
 		Optional<Character> localOpt = characterService.getCharacter(characterAndOwner.getCharacterName());
 		if (!localOpt.isPresent()) {
 			return JS.message(HttpStatus.NOT_FOUND,
@@ -197,7 +198,7 @@ public class CharacterController {
 
 	@RequestMapping(path = "/get-selected-character", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<JsonNode> getSelectedCharacter(@RequestBody UsernameParameter username) {
+	public ResponseEntity<JsonNode> getSelectedCharacter(@Valid @RequestBody UsernameParameter username) {
 		Optional<Character> selectedCharacter = characterService.getSelectedCharacter(username.getUsername());
 		if (selectedCharacter.isPresent()) {
 			return JS.message(HttpStatus.OK, selectedCharacter.get());
@@ -208,7 +209,7 @@ public class CharacterController {
 
 	@RequestMapping(path = "/save-equipped-items", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<JsonNode> saveEquippedItems(@RequestBody SavedEquippedItemsParameter input) throws IOException {
+	public ResponseEntity<JsonNode> saveEquippedItems(@Valid @RequestBody EqippedItemsParameter input) throws IOException {
 		Optional<Character> selectedCharacterOpt = characterService.getCharacter(input.getCharacterName());
 		if (selectedCharacterOpt.isPresent()) {
 			Character character = selectedCharacterOpt.get();
@@ -217,7 +218,7 @@ public class CharacterController {
 					.getWardrobeItems(character.getCharacterName());
 
 			List<String> items = wardrobeItems.getResponse().orElse(new ArrayList<String>());
-			for (SavedEquippedItemsParameter.EquippedItem equippedItem : input.getEquippedItems()) {
+			for (EquippedItem equippedItem : input.getEquippedItems()) {
 				equippCharacter(character, items, equippedItem);
 			}
 			Character saveCharacter = characterService.saveCharacter(character);
@@ -228,7 +229,7 @@ public class CharacterController {
 	}
 
 	private void equippCharacter(Character character, List<String> items,
-			SavedEquippedItemsParameter.EquippedItem equippedItem) {
+			EquippedItem equippedItem) {
 		String armament = equippedItem.getArmament();
 		String armor = equippedItem.getArmor();
 		String itemSlot = equippedItem.getItemSlot();
