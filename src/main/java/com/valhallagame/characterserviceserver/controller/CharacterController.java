@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.valhallagame.characterserviceclient.message.CharacterNameAndOwnerUsernameParameter;
 import com.valhallagame.characterserviceclient.message.CharacterNameParameter;
 import com.valhallagame.characterserviceclient.message.EqippedItemsParameter;
-import com.valhallagame.characterserviceclient.message.EquippedItem;
+import com.valhallagame.characterserviceclient.message.EquippedItemParameter;
 import com.valhallagame.characterserviceclient.message.UsernameParameter;
 import com.valhallagame.characterserviceserver.model.Character;
 import com.valhallagame.characterserviceserver.service.CharacterService;
@@ -218,7 +218,7 @@ public class CharacterController {
 					.getWardrobeItems(character.getCharacterName());
 
 			List<String> items = wardrobeItems.getResponse().orElse(new ArrayList<String>());
-			for (EquippedItem equippedItem : input.getEquippedItems()) {
+			for (EquippedItemParameter equippedItem : input.getEquippedItems()) {
 				equippCharacter(character, items, equippedItem);
 			}
 			Character saveCharacter = characterService.saveCharacter(character);
@@ -229,7 +229,7 @@ public class CharacterController {
 	}
 
 	private void equippCharacter(Character character, List<String> items,
-			EquippedItem equippedItem) {
+			EquippedItemParameter equippedItem) {
 		String armament = equippedItem.getArmament();
 		String armor = equippedItem.getArmor();
 		String itemSlot = equippedItem.getItemSlot();
