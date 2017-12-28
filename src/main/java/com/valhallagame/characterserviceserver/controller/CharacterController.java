@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -81,9 +82,17 @@ public class CharacterController {
 	@ResponseBody
 	public ResponseEntity<JsonNode> createDebugCharacter(@Valid @RequestBody CharacterNameAndOwnerUsernameParameter characterData)
 			throws IOException {
-		String charName = characterData.getCharacterName();
+		String charName = characterData.getCharacterName().toLowerCase();
 		Optional<Character> localOpt = characterService.getCharacter(charName);
 		if (!localOpt.isPresent()) {
+			
+			String characterDisplayName = characterData.getCharacterName().chars()
+					.mapToObj(c -> String.valueOf((char) c))
+					.map(c -> Math.random() < 0.5 ? c.toUpperCase() : c.toLowerCase())
+					.collect(Collectors.joining());
+			
+			characterData.setCharacterName(characterDisplayName);
+			
 			return create(characterData);
 		} else {
 			Character character = localOpt.get();
