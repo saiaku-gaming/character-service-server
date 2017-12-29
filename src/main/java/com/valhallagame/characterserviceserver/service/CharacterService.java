@@ -3,16 +3,22 @@ package com.valhallagame.characterserviceserver.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.valhallagame.characterserviceserver.model.Character;
 import com.valhallagame.characterserviceserver.repository.CharacterRepository;
+import com.valhallagame.common.rabbitmq.NotificationMessage;
+import com.valhallagame.common.rabbitmq.RabbitMQRouting;
 
 @Service
 public class CharacterService {
 	@Autowired
 	private CharacterRepository characterRepository;
+
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
 
 	public Character saveCharacter(Character character) {
 		return characterRepository.save(character);
@@ -28,6 +34,8 @@ public class CharacterService {
 
 	public void setSelectedCharacter(String owner, String characterName) {
 		characterRepository.setSelectedCharacter(owner.toLowerCase(), characterName.toLowerCase());
+		rabbitTemplate.convertAndSend(RabbitMQRouting.Exchange.CHARACTER.name(),
+				RabbitMQRouting.Character.SELECT.name(), new NotificationMessage(owner, "Changed selected character"));
 	}
 
 	public Optional<Character> getSelectedCharacter(String owner) {

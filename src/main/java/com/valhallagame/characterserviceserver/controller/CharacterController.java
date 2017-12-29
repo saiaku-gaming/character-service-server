@@ -48,7 +48,8 @@ public class CharacterController {
 
 	@RequestMapping(path = "/get-character-without-owner-validation", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<JsonNode> getCharacterWithoutOwnerValidation(@Valid @RequestBody CharacterNameParameter character) {
+	public ResponseEntity<JsonNode> getCharacterWithoutOwnerValidation(
+			@Valid @RequestBody CharacterNameParameter character) {
 
 		Optional<Character> optcharacter = characterService.getCharacter(character.getCharacterName());
 		if (!optcharacter.isPresent()) {
@@ -59,7 +60,8 @@ public class CharacterController {
 
 	@RequestMapping(path = "/get-character", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<JsonNode> getCharacter(@Valid @RequestBody CharacterNameAndOwnerUsernameParameter characterAndOwner) {
+	public ResponseEntity<JsonNode> getCharacter(
+			@Valid @RequestBody CharacterNameAndOwnerUsernameParameter characterAndOwner) {
 		Optional<Character> optcharacter = characterService.getCharacter(characterAndOwner.getCharacterName());
 		if (!optcharacter.isPresent()) {
 			return JS.message(HttpStatus.NOT_FOUND, "No character with that character name was found!");
@@ -80,19 +82,18 @@ public class CharacterController {
 
 	@RequestMapping(path = "/create-debug-character", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<JsonNode> createDebugCharacter(@Valid @RequestBody CharacterNameAndOwnerUsernameParameter characterData)
-			throws IOException {
+	public ResponseEntity<JsonNode> createDebugCharacter(
+			@Valid @RequestBody CharacterNameAndOwnerUsernameParameter characterData) throws IOException {
 		String charName = characterData.getCharacterName().toLowerCase();
 		Optional<Character> localOpt = characterService.getCharacter(charName);
 		if (!localOpt.isPresent()) {
-			
+
 			String characterDisplayName = characterData.getCharacterName().chars()
 					.mapToObj(c -> String.valueOf((char) c))
-					.map(c -> Math.random() < 0.5 ? c.toUpperCase() : c.toLowerCase())
-					.collect(Collectors.joining());
-			
+					.map(c -> Math.random() < 0.5 ? c.toUpperCase() : c.toLowerCase()).collect(Collectors.joining());
+
 			characterData.setCharacterName(characterDisplayName);
-			
+
 			return create(characterData);
 		} else {
 			Character character = localOpt.get();
@@ -137,7 +138,8 @@ public class CharacterController {
 
 	@RequestMapping(path = "/delete", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<JsonNode> delete(@Valid @RequestBody CharacterNameAndOwnerUsernameParameter characterAndOwner) {
+	public ResponseEntity<JsonNode> delete(
+			@Valid @RequestBody CharacterNameAndOwnerUsernameParameter characterAndOwner) {
 		String owner = characterAndOwner.getOwnerUsername();
 		Optional<Character> localOpt = characterService.getCharacter(characterAndOwner.getCharacterName());
 		if (!localOpt.isPresent()) {
@@ -190,7 +192,8 @@ public class CharacterController {
 
 	@RequestMapping(path = "/select-character", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<JsonNode> selectCharacter(@Valid @RequestBody CharacterNameAndOwnerUsernameParameter characterAndOwner) {
+	public ResponseEntity<JsonNode> selectCharacter(
+			@Valid @RequestBody CharacterNameAndOwnerUsernameParameter characterAndOwner) {
 		Optional<Character> localOpt = characterService.getCharacter(characterAndOwner.getCharacterName());
 		if (!localOpt.isPresent()) {
 			return JS.message(HttpStatus.NOT_FOUND,
@@ -218,7 +221,8 @@ public class CharacterController {
 
 	@RequestMapping(path = "/save-equipped-items", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<JsonNode> saveEquippedItems(@Valid @RequestBody EqippedItemsParameter input) throws IOException {
+	public ResponseEntity<JsonNode> saveEquippedItems(@Valid @RequestBody EqippedItemsParameter input)
+			throws IOException {
 		Optional<Character> selectedCharacterOpt = characterService.getCharacter(input.getCharacterName());
 		if (selectedCharacterOpt.isPresent()) {
 			Character character = selectedCharacterOpt.get();
@@ -237,8 +241,7 @@ public class CharacterController {
 		}
 	}
 
-	private void equippCharacter(Character character, List<String> items,
-			EquippedItemParameter equippedItem) {
+	private void equippCharacter(Character character, List<String> items, EquippedItemParameter equippedItem) {
 		String armament = equippedItem.getArmament();
 		String armor = equippedItem.getArmor();
 		String itemSlot = equippedItem.getItemSlot();
