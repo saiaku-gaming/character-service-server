@@ -3,6 +3,7 @@ package com.valhallagame.characterserviceserver;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,21 +20,24 @@ public class App {
 
 	public static void main(String[] args) {
 		if (args.length > 0) {
+			logger.info("Args passed in: " + Arrays.asList(args).toString());
 			// override system properties with local properties
 			try (InputStream inputStream = new FileInputStream(args[0])) {
 				System.getProperties().load(inputStream);
 			} catch (IOException e) {
 				logger.error("Failed to read input.", e);
 			}
+		} else {
+			logger.info("No args passed to main");
 		}
 
 		SpringApplication.run(App.class, args);
 	}
 
 	@Bean
-    public EmbeddedServletContainerCustomizer containerCustomizer() {
-        return (container -> {
-            container.setPort(DefaultServicePortMappings.CHARACTER_SERVICE_PORT);
-        });
-    }
+	public EmbeddedServletContainerCustomizer containerCustomizer() {
+		return (container -> {
+			container.setPort(DefaultServicePortMappings.CHARACTER_SERVICE_PORT);
+		});
+	}
 }
