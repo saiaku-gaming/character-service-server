@@ -46,6 +46,9 @@ public class CharacterController {
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
+	@Autowired
+	private WardrobeServiceClient wardrobeServiceClient;
+
 	@RequestMapping(path = "/get-character-without-owner-validation", method = RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<JsonNode> getCharacterWithoutOwnerValidation(
@@ -123,7 +126,6 @@ public class CharacterController {
 			c.setMainhandArmament("Sword");
 			c.setOffHandArmament("Medium_Shield");
 
-			WardrobeServiceClient wardrobeServiceClient = WardrobeServiceClient.get();
 			wardrobeServiceClient.addWardrobeItem(charNameLower, "Leather_Armor");
 			wardrobeServiceClient.addWardrobeItem(charNameLower, "Sword");
 			wardrobeServiceClient.addWardrobeItem(charNameLower, "Medium_Shield");
@@ -223,13 +225,12 @@ public class CharacterController {
 	@ResponseBody
 	public ResponseEntity<JsonNode> saveEquippedItems(@Valid @RequestBody EqippedItemsParameter input)
 			throws IOException {
-		
+
 		logger.info("Saving equipment " + input);
-		
+
 		Optional<Character> selectedCharacterOpt = characterService.getCharacter(input.getCharacterName());
 		if (selectedCharacterOpt.isPresent()) {
 			Character character = selectedCharacterOpt.get();
-			WardrobeServiceClient wardrobeServiceClient = WardrobeServiceClient.get();
 			RestResponse<List<String>> wardrobeItems = wardrobeServiceClient
 					.getWardrobeItems(character.getCharacterName());
 
