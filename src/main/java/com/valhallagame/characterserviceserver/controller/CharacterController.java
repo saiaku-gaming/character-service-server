@@ -251,21 +251,21 @@ public class CharacterController {
 		String armor = equippedItem.getArmor();
 		String itemSlot = equippedItem.getItemSlot();
 		switch (itemSlot) {
-		case "Mainhand":
+		case "MAINHAND":
 			if (items.contains(armament)) {
 				character.setMainhandArmament(armament);
 			} else {
 				logger.error("wardrobe does not have armament {} in {} ", armament, items);
 			}
 			break;
-		case "Offhand":
+		case "OFFHAND":
 			if (items.contains(armament)) {
 				character.setOffHandArmament(armament);
 			} else {
 				logger.error("wardrobe does not have armament {} in {}", armament, items);
 			}
 			break;
-		case "Chest":
+		case "CHEST":
 			if (items.contains(armor)) {
 				character.setChestItem(armor);
 			} else {
