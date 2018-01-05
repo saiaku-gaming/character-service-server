@@ -235,7 +235,7 @@ public class CharacterController {
 					.getWardrobeItems(character.getCharacterName());
 
 			List<String> items = wardrobeItems.getResponse().orElse(new ArrayList<String>());
-			items.add("None");
+			items.add("NONE");
 			for (EquippedItemParameter equippedItem : input.getEquippedItems()) {
 				equippCharacter(character, items, equippedItem);
 			}
