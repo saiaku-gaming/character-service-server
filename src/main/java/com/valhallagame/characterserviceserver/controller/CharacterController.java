@@ -226,7 +226,7 @@ public class CharacterController {
 	public ResponseEntity<JsonNode> saveEquippedItems(@Valid @RequestBody EqippedItemsParameter input)
 			throws IOException {
 
-		logger.info("Saving equipment " + input);
+		logger.info("Saving equipment {}", input);
 
 		Optional<Character> selectedCharacterOpt = characterService.getCharacter(input.getCharacterName());
 		if (selectedCharacterOpt.isPresent()) {
