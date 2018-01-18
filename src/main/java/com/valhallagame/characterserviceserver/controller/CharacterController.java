@@ -34,6 +34,7 @@ import com.valhallagame.common.rabbitmq.NotificationMessage;
 import com.valhallagame.common.rabbitmq.RabbitMQRouting;
 import com.valhallagame.wardrobeserviceclient.WardrobeServiceClient;
 import com.valhallagame.wardrobeserviceclient.message.AddWardrobeItemParameter;
+import com.valhallagame.wardrobeserviceclient.message.WardrobeItem;
 
 @Controller
 @RequestMapping(path = "/v1/character")
@@ -123,13 +124,13 @@ public class CharacterController {
 			c.setDisplayCharacterName(charName);
 			String charNameLower = characterData.getCharacterName().toLowerCase();
 			c.setCharacterName(charNameLower);
-			c.setChestItem("Leather_Armor");
-			c.setMainhandArmament("Sword");
-			c.setOffHandArmament("Medium_Shield");
+			c.setChestItem(WardrobeItem.LEATHER_ARMOR.name());
+			c.setMainhandArmament(WardrobeItem.SWORD.name());
+			c.setOffHandArmament(WardrobeItem.MEDIUM_SHIELD.name());
 
-			wardrobeServiceClient.addWardrobeItem(new AddWardrobeItemParameter(charNameLower, "Leather_Armor"));
-			wardrobeServiceClient.addWardrobeItem(new AddWardrobeItemParameter(charNameLower, "Sword"));
-			wardrobeServiceClient.addWardrobeItem(new AddWardrobeItemParameter(charNameLower, "Medium_Shield"));
+			wardrobeServiceClient.addWardrobeItem(new AddWardrobeItemParameter(charNameLower, WardrobeItem.LEATHER_ARMOR));
+			wardrobeServiceClient.addWardrobeItem(new AddWardrobeItemParameter(charNameLower, WardrobeItem.SWORD));
+			wardrobeServiceClient.addWardrobeItem(new AddWardrobeItemParameter(charNameLower, WardrobeItem.MEDIUM_SHIELD));
 
 			c = characterService.saveCharacter(c);
 			characterService.setSelectedCharacter(c.getOwnerUsername(), c.getCharacterName());
@@ -156,9 +157,9 @@ public class CharacterController {
 			// person has one.
 			Optional<Character> selectedCharacterOpt = characterService.getSelectedCharacter(owner);
 			if (selectedCharacterOpt.isPresent() && selectedCharacterOpt.get().equals(local)) {
-				characterService.getCharacters(owner).stream().filter(x -> !x.equals(local)).findAny().ifPresent(ch -> {
-					characterService.setSelectedCharacter(owner, ch.getCharacterName());
-				});
+				characterService.getCharacters(owner).stream().filter(x -> !x.equals(local)).findAny().ifPresent(ch -> 
+					characterService.setSelectedCharacter(owner, ch.getCharacterName())
+				);
 			}
 			characterService.deleteCharacter(local);
 
