@@ -234,7 +234,7 @@ public class CharacterController {
 		if (selectedCharacterOpt.isPresent()) {
 			Character character = selectedCharacterOpt.get();
 			RestResponse<List<String>> wardrobeItems = wardrobeServiceClient
-					.getWardrobeItems(character.getCharacterName());
+					.getWardrobeItems(character.getOwnerUsername());
 
 			List<String> items = wardrobeItems.getResponse().orElse(new ArrayList<String>());
 			items.add("NONE");
