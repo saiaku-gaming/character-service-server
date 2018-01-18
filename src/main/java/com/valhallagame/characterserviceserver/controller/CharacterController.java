@@ -33,6 +33,7 @@ import com.valhallagame.common.RestResponse;
 import com.valhallagame.common.rabbitmq.NotificationMessage;
 import com.valhallagame.common.rabbitmq.RabbitMQRouting;
 import com.valhallagame.wardrobeserviceclient.WardrobeServiceClient;
+import com.valhallagame.wardrobeserviceclient.message.AddWardrobeItemParameter;
 
 @Controller
 @RequestMapping(path = "/v1/character")
@@ -126,9 +127,9 @@ public class CharacterController {
 			c.setMainhandArmament("Sword");
 			c.setOffHandArmament("Medium_Shield");
 
-			wardrobeServiceClient.addWardrobeItem(charNameLower, "Leather_Armor");
-			wardrobeServiceClient.addWardrobeItem(charNameLower, "Sword");
-			wardrobeServiceClient.addWardrobeItem(charNameLower, "Medium_Shield");
+			wardrobeServiceClient.addWardrobeItem(new AddWardrobeItemParameter(charNameLower, "Leather_Armor"));
+			wardrobeServiceClient.addWardrobeItem(new AddWardrobeItemParameter(charNameLower, "Sword"));
+			wardrobeServiceClient.addWardrobeItem(new AddWardrobeItemParameter(charNameLower, "Medium_Shield"));
 
 			c = characterService.saveCharacter(c);
 			characterService.setSelectedCharacter(c.getOwnerUsername(), c.getCharacterName());
