@@ -170,7 +170,7 @@ public class CharacterController {
 			}
 			characterService.deleteCharacter(local);
 
-			NotificationMessage notificationMessage = new NotificationMessage("", "A character was deleted");
+			NotificationMessage notificationMessage = new NotificationMessage(owner, "A character was deleted");
 			notificationMessage.addData("characterName", local.getCharacterName());
 
 			rabbitTemplate.convertAndSend(RabbitMQRouting.Exchange.CHARACTER.name(),
