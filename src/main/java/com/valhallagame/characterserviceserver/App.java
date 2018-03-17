@@ -20,8 +20,8 @@ public class App {
 
 	public static void main(String[] args) {
 		if (args.length > 0) {
-			if(logger.isInfoEnabled()) {
-				logger.info("Args passed in: {}",  Arrays.asList(args).toString());
+			if (logger.isInfoEnabled()) {
+				logger.info("Args passed in: {}", Arrays.asList(args));
 			}
 			// override system properties with local properties
 
@@ -48,8 +48,6 @@ public class App {
 
 	@Bean
 	public EmbeddedServletContainerCustomizer containerCustomizer() {
-		return (container -> {
-			container.setPort(DefaultServicePortMappings.CHARACTER_SERVICE_PORT);
-		});
+		return (container -> container.setPort(DefaultServicePortMappings.CHARACTER_SERVICE_PORT));
 	}
 }
