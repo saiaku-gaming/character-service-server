@@ -98,7 +98,8 @@ public class CharacterController {
 		Optional<Character> localOpt = characterService.getCharacter(charName);
 		if (!localOpt.isPresent()) {
 
-			String characterDisplayName = input.getDisplayCharacterName().chars().mapToObj(c -> String.valueOf((char) c))
+			String characterDisplayName = input.getDisplayCharacterName().chars()
+					.mapToObj(c -> String.valueOf((char) c))
 					.map(c -> Math.random() < 0.5 ? c.toUpperCase() : c.toLowerCase()).collect(Collectors.joining());
 
 			input.setDisplayCharacterName(characterDisplayName);
@@ -244,7 +245,11 @@ public class CharacterController {
 			List<String> items = wardrobeItems.getResponse().orElse(new ArrayList<String>());
 			items.add("NONE");
 			for (EquippedItemParameter equippedItem : input.getEquippedItems()) {
-				equippCharacter(character, items, equippedItem);
+				if (!equippCharacter(character, items, equippedItem)) {
+					return JS.message(HttpStatus.BAD_REQUEST,
+							"Your character %s tried to equip %s but can only equip items: %s", character, equippedItem,
+							items);
+				}
 			}
 			Character saveCharacter = characterService.saveCharacter(character);
 			return JS.message(HttpStatus.OK, saveCharacter);
@@ -253,7 +258,7 @@ public class CharacterController {
 		}
 	}
 
-	private void equippCharacter(Character character, List<String> items, EquippedItemParameter equippedItem) {
+	private boolean equippCharacter(Character character, List<String> items, EquippedItemParameter equippedItem) {
 		String armament = equippedItem.getArmament();
 		String armor = equippedItem.getArmor();
 		String itemSlot = equippedItem.getItemSlot();
@@ -261,27 +266,30 @@ public class CharacterController {
 		case "MAINHAND":
 			if (items.contains(armament)) {
 				character.setMainhandArmament(armament);
+				return true;
 			} else {
 				logger.error("wardrobe does not have armament {} in {} ", armament, items);
+				return false;
 			}
-			break;
 		case "OFFHAND":
 			if (items.contains(armament)) {
 				character.setOffHandArmament(armament);
+				return true;
 			} else {
 				logger.error("wardrobe does not have armament {} in {}", armament, items);
+				return false;
 			}
-			break;
 		case "CHEST":
 			if (items.contains(armor)) {
 				character.setChestItem(armor);
+				return true;
 			} else {
 				logger.error("wardrobe does not have armor {} in {}", armor, items);
+				return false;
 			}
-			break;
 		default:
 			logger.error("{} DOES NOT EXIST AS A SLOT!", itemSlot);
-			break;
+			return false;
 		}
 	}
 
