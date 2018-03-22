@@ -8,7 +8,7 @@ import com.valhallagame.common.DefaultServicePortMappings;
 import com.valhallagame.wardrobeserviceclient.WardrobeServiceClient;
 
 @Configuration
-@Profile("default")
+@Profile("development")
 public class DevConfig {
 	@Bean
 	public WardrobeServiceClient wardrobeServiceClient() {
