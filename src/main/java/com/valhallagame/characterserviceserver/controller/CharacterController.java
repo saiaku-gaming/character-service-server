@@ -205,15 +205,16 @@ public class CharacterController {
 	@RequestMapping(path = "/select-character", method = RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<JsonNode> selectCharacter(@Valid @RequestBody SelectCharacterParameter input) {
-		Optional<Character> localOpt = characterService.getCharacter(input.getCharacterName());
+		String characterName = input.getDisplayCharacterName().toLowerCase();
+		Optional<Character> localOpt = characterService.getCharacter(characterName);
 		if (!localOpt.isPresent()) {
 			return JS.message(HttpStatus.NOT_FOUND,
-					"Character with name " + input.getCharacterName() + " was not found.");
+					"Character with name " + characterName + " was not found.");
 		} else {
 			if (!localOpt.get().getOwnerUsername().equals(input.getUsername())) {
 				return JS.message(HttpStatus.FORBIDDEN, "You don't own that character.");
 			}
-			characterService.setSelectedCharacter(input.getUsername(), input.getCharacterName());
+			characterService.setSelectedCharacter(input.getUsername(), characterName);
 			return JS.message(HttpStatus.OK, "Character selected");
 		}
 	}
