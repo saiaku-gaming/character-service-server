@@ -154,7 +154,7 @@ public class CharacterController {
 	@ResponseBody
 	public ResponseEntity<JsonNode> deleteCharacter(@Valid @RequestBody DeleteCharacterParameter input) {
 		String owner = input.getUsername();
-		Optional<Character> localOpt = characterService.getCharacter(input.getCharacterName());
+		Optional<Character> localOpt = characterService.getCharacter(input.getDisplayCharacterName().toLowerCase());
 		if (!localOpt.isPresent()) {
 			return JS.message(HttpStatus.NOT_FOUND, "Not found");
 		}
