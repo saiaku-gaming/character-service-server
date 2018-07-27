@@ -1,13 +1,19 @@
 package com.valhallagame.characterserviceserver.controller;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import javax.validation.Valid;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.valhallagame.characterserviceclient.message.*;
+import com.valhallagame.characterserviceserver.model.Character;
+import com.valhallagame.characterserviceserver.service.CharacterService;
+import com.valhallagame.common.JS;
+import com.valhallagame.common.RestResponse;
+import com.valhallagame.common.rabbitmq.NotificationMessage;
+import com.valhallagame.common.rabbitmq.RabbitMQRouting;
+import com.valhallagame.traitserviceclient.TraitServiceClient;
+import com.valhallagame.traitserviceclient.message.TraitType;
+import com.valhallagame.traitserviceclient.message.UnlockTraitParameter;
+import com.valhallagame.wardrobeserviceclient.WardrobeServiceClient;
+import com.valhallagame.wardrobeserviceclient.message.AddWardrobeItemParameter;
+import com.valhallagame.wardrobeserviceclient.message.WardrobeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -20,27 +26,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.valhallagame.characterserviceclient.message.CharacterAvailableParameter;
-import com.valhallagame.characterserviceclient.message.CreateCharacterParameter;
-import com.valhallagame.characterserviceclient.message.CreateDebugCharacterParameter;
-import com.valhallagame.characterserviceclient.message.DeleteCharacterParameter;
-import com.valhallagame.characterserviceclient.message.EquippedItemParameter;
-import com.valhallagame.characterserviceclient.message.GetAllCharactersParameter;
-import com.valhallagame.characterserviceclient.message.GetCharacterParameter;
-import com.valhallagame.characterserviceclient.message.GetOwnedCharacterParameter;
-import com.valhallagame.characterserviceclient.message.GetSelectedCharacterParameter;
-import com.valhallagame.characterserviceclient.message.SaveEquippedItemsParameter;
-import com.valhallagame.characterserviceclient.message.SelectCharacterParameter;
-import com.valhallagame.characterserviceserver.model.Character;
-import com.valhallagame.characterserviceserver.service.CharacterService;
-import com.valhallagame.common.JS;
-import com.valhallagame.common.RestResponse;
-import com.valhallagame.common.rabbitmq.NotificationMessage;
-import com.valhallagame.common.rabbitmq.RabbitMQRouting;
-import com.valhallagame.wardrobeserviceclient.WardrobeServiceClient;
-import com.valhallagame.wardrobeserviceclient.message.AddWardrobeItemParameter;
-import com.valhallagame.wardrobeserviceclient.message.WardrobeItem;
+import javax.validation.Valid;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(path = "/v1/character")
@@ -57,16 +48,19 @@ public class CharacterController {
 	@Autowired
 	private WardrobeServiceClient wardrobeServiceClient;
 
+    @Autowired
+    private TraitServiceClient traitServiceClient;
+
 	@RequestMapping(path = "/get-character", method = RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<JsonNode> getCharacterWithoutOwnerValidation(
 			@Valid @RequestBody GetCharacterParameter input) {
 
-		Optional<Character> optcharacter = characterService.getCharacter(input.getCharacterName());
-		if (!optcharacter.isPresent()) {
+        Optional<Character> optCharacter = characterService.getCharacter(input.getCharacterName());
+        if (!optCharacter.isPresent()) {
 			return JS.message(HttpStatus.NOT_FOUND, "No character with that character name was found!");
 		}
-		return JS.message(HttpStatus.OK, optcharacter.get());
+        return JS.message(HttpStatus.OK, optCharacter.get());
 	}
 
 	@RequestMapping(path = "/get-owned-character", method = RequestMethod.POST)
@@ -105,7 +99,7 @@ public class CharacterController {
 			input.setDisplayCharacterName(characterDisplayName);
 
 			CreateCharacterParameter out = new CreateCharacterParameter(input.getDisplayCharacterName(),
-					input.getUsername());
+                    input.getUsername(), "warrior");
 
 			return createCharacter(out);
 		} else {
@@ -121,34 +115,88 @@ public class CharacterController {
 	public ResponseEntity<JsonNode> createCharacter(@Valid @RequestBody CreateCharacterParameter input)
 			throws IOException {
 
-		String charName = input.getDisplayCharacterName();
-		if (charName.contains("#")) {
+        String displayCharacterName = input.getDisplayCharacterName();
+        if (displayCharacterName.contains("#")) {
 			return JS.message(HttpStatus.BAD_REQUEST, "# is not allowed in character name");
 		}
-		Optional<Character> localOpt = characterService.getCharacter(charName.toLowerCase());
+        Optional<Character> localOpt = characterService.getCharacter(displayCharacterName.toLowerCase());
 		if (!localOpt.isPresent()) {
-			Character c = new Character();
-			c.setOwnerUsername(input.getUsername());
-			c.setDisplayCharacterName(charName);
-			String charNameLower = input.getDisplayCharacterName().toLowerCase();
-			c.setCharacterName(charNameLower);
-			c.setChestItem(WardrobeItem.LEATHER_ARMOR.name());
-			c.setMainhandArmament(WardrobeItem.SWORD.name());
-			c.setOffHandArmament(WardrobeItem.MEDIUM_SHIELD.name());
+            Character character = new Character();
+            character.setOwnerUsername(input.getUsername());
+            character.setDisplayCharacterName(displayCharacterName);
 
-			wardrobeServiceClient
-					.addWardrobeItem(new AddWardrobeItemParameter(charNameLower, WardrobeItem.LEATHER_ARMOR));
-			wardrobeServiceClient.addWardrobeItem(new AddWardrobeItemParameter(charNameLower, WardrobeItem.SWORD));
-			wardrobeServiceClient
-					.addWardrobeItem(new AddWardrobeItemParameter(charNameLower, WardrobeItem.MEDIUM_SHIELD));
+            String characterName = input.getDisplayCharacterName().toLowerCase();
+            character.setCharacterName(characterName);
 
-			c = characterService.saveCharacter(c);
-			characterService.setSelectedCharacter(c.getOwnerUsername(), c.getCharacterName());
+            switch (input.getStartingClass()) {
+                case "warrior":
+                    equipAsWarrior(character, characterName);
+                    break;
+                case "shaman":
+                    equipAsShaman(character, characterName);
+                    break;
+                case "ranger":
+                    equipAsRanger(character, characterName);
+                    break;
+                default:
+                    throw new IllegalArgumentException(input.getStartingClass() + " is not warrior, shaman or ranger!");
+            }
+            character = characterService.saveCharacter(character);
+            characterService.setSelectedCharacter(character.getOwnerUsername(), character.getCharacterName());
 		} else {
 			return JS.message(HttpStatus.CONFLICT, "Character already exists.");
 		}
 		return JS.message(HttpStatus.OK, "OK");
 	}
+
+    private void equipAsWarrior(Character c, String characterName) throws IOException {
+        c.setChestItem(WardrobeItem.MAIL_ARMOR.name());
+        c.setMainhandArmament(WardrobeItem.SWORD.name());
+        c.setOffHandArmament(WardrobeItem.MEDIUM_SHIELD.name());
+
+        addWardrobeItem(characterName, WardrobeItem.MAIL_ARMOR);
+        addWardrobeItem(characterName, WardrobeItem.SWORD);
+        addWardrobeItem(characterName, WardrobeItem.MEDIUM_SHIELD);
+
+        addTrait(characterName, TraitType.SHIELD_BASH);
+        addTrait(characterName, TraitType.RECOVER);
+        addTrait(characterName, TraitType.TAUNT);
+        addTrait(characterName, TraitType.KICK);
+    }
+
+    private void equipAsShaman(Character c, String characterName) throws IOException {
+        c.setChestItem(WardrobeItem.CLOTH_ARMOR.name());
+        c.setMainhandArmament(WardrobeItem.SWORD.name());
+
+        addWardrobeItem(characterName, WardrobeItem.CLOTH_ARMOR);
+        addWardrobeItem(characterName, WardrobeItem.SWORD);
+
+        addTrait(characterName, TraitType.FROST_BLAST);
+        addTrait(characterName, TraitType.SEIDHRING);
+        addTrait(characterName, TraitType.PETRIFY);
+        addTrait(characterName, TraitType.FRIGGS_INTERVENTION);
+    }
+
+    private void equipAsRanger(Character c, String characterName) throws IOException {
+        c.setChestItem(WardrobeItem.LEATHER_ARMOR.name());
+        c.setMainhandArmament(WardrobeItem.LONGSWORD.name());
+
+        addWardrobeItem(characterName, WardrobeItem.LEATHER_ARMOR);
+        addWardrobeItem(characterName, WardrobeItem.SWORD);
+
+        addTrait(characterName, TraitType.SHIELD_BREAKER);
+        addTrait(characterName, TraitType.HEMORRHAGE);
+        addTrait(characterName, TraitType.DODGE);
+        addTrait(characterName, TraitType.KICK);
+    }
+
+    private void addWardrobeItem(String characterName, WardrobeItem wardrobeItem) throws IOException {
+        wardrobeServiceClient.addWardrobeItem(new AddWardrobeItemParameter(characterName, wardrobeItem));
+    }
+
+    private void addTrait(String characterName, TraitType traitType) throws IOException {
+        traitServiceClient.unlockTrait(new UnlockTraitParameter(characterName, traitType));
+    }
 
 	@RequestMapping(path = "/delete-character", method = RequestMethod.POST)
 	@ResponseBody

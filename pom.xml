@@ -89,6 +89,11 @@
 			<artifactId>character-service-client</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>com.valhallagame.valhalla</groupId>
+			<artifactId>trait-service-client</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -114,7 +119,6 @@
 					<imageTags>
 						<imageTag>latest</imageTag>
 					</imageTags>
-					<useConfigFile>true</useConfigFile>
 					<baseImage>frolvlad/alpine-oraclejdk8:slim</baseImage>
 					<entryPoint>["java", "-Xmx256m", "-Xss512k", "-Xms32m", "-jar", "/${project.build.finalName}.jar"]</entryPoint>
 					<resources>
