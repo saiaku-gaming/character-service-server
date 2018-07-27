@@ -167,6 +167,7 @@ public class CharacterController {
     private void equipAsShaman(Character c, String characterName) throws IOException {
         c.setChestItem(WardrobeItem.CLOTH_ARMOR.name());
         c.setMainhandArmament(WardrobeItem.SWORD.name());
+        c.setOffHandArmament("NONE");
 
         addWardrobeItem(characterName, WardrobeItem.CLOTH_ARMOR);
         addWardrobeItem(characterName, WardrobeItem.SWORD);
@@ -180,6 +181,7 @@ public class CharacterController {
     private void equipAsRanger(Character c, String characterName) throws IOException {
         c.setChestItem(WardrobeItem.LEATHER_ARMOR.name());
         c.setMainhandArmament(WardrobeItem.LONGSWORD.name());
+        c.setOffHandArmament("NONE");
 
         addWardrobeItem(characterName, WardrobeItem.LEATHER_ARMOR);
         addWardrobeItem(characterName, WardrobeItem.SWORD);
