@@ -18,7 +18,7 @@ public class DevConfig {
 
 	@Bean
 	public TraitServiceClient traitServiceClient() {
-		WardrobeServiceClient.init("http://dev-trait-service:" + DefaultServicePortMappings.TRAIT_SERVICE_PORT);
+        TraitServiceClient.init("http://dev-trait-service:" + DefaultServicePortMappings.TRAIT_SERVICE_PORT);
 		return TraitServiceClient.get();
 	}
 }
