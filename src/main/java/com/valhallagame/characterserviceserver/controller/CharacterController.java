@@ -184,7 +184,7 @@ public class CharacterController {
         c.setOffHandArmament("NONE");
 
         addWardrobeItem(characterName, WardrobeItem.LEATHER_ARMOR);
-        addWardrobeItem(characterName, WardrobeItem.SWORD);
+        addWardrobeItem(characterName, WardrobeItem.LONGSWORD);
 
         addTrait(characterName, TraitType.SHIELD_BREAKER);
         addTrait(characterName, TraitType.HEMORRHAGE);
