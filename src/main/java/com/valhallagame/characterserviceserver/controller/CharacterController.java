@@ -149,10 +149,10 @@ public class CharacterController {
 		return JS.message(HttpStatus.OK, "OK");
 	}
 
-    private void equipAsWarrior(Character c, String characterName) throws IOException {
-        c.setChestItem(WardrobeItem.MAIL_ARMOR.name());
-        c.setMainhandArmament(WardrobeItem.SWORD.name());
-        c.setOffHandArmament(WardrobeItem.MEDIUM_SHIELD.name());
+    private void equipAsWarrior(Character character, String characterName) throws IOException {
+        character.setChestItem(WardrobeItem.MAIL_ARMOR.name());
+        character.setMainhandArmament(WardrobeItem.SWORD.name());
+        character.setOffHandArmament(WardrobeItem.MEDIUM_SHIELD.name());
 
         addWardrobeItem(characterName, WardrobeItem.MAIL_ARMOR);
         addWardrobeItem(characterName, WardrobeItem.SWORD);
@@ -164,10 +164,10 @@ public class CharacterController {
         addTrait(characterName, TraitType.KICK);
     }
 
-    private void equipAsShaman(Character c, String characterName) throws IOException {
-        c.setChestItem(WardrobeItem.CLOTH_ARMOR.name());
-        c.setMainhandArmament(WardrobeItem.SWORD.name());
-        c.setOffHandArmament("NONE");
+    private void equipAsShaman(Character character, String characterName) throws IOException {
+        character.setChestItem(WardrobeItem.CLOTH_ARMOR.name());
+        character.setMainhandArmament(WardrobeItem.SWORD.name());
+        character.setOffHandArmament("NONE");
 
         addWardrobeItem(characterName, WardrobeItem.CLOTH_ARMOR);
         addWardrobeItem(characterName, WardrobeItem.SWORD);
@@ -178,10 +178,10 @@ public class CharacterController {
         addTrait(characterName, TraitType.FRIGGS_INTERVENTION);
     }
 
-    private void equipAsRanger(Character c, String characterName) throws IOException {
-        c.setChestItem(WardrobeItem.LEATHER_ARMOR.name());
-        c.setMainhandArmament(WardrobeItem.LONGSWORD.name());
-        c.setOffHandArmament("NONE");
+    private void equipAsRanger(Character character, String characterName) throws IOException {
+        character.setChestItem(WardrobeItem.LEATHER_ARMOR.name());
+        character.setMainhandArmament(WardrobeItem.LONGSWORD.name());
+        character.setOffHandArmament("NONE");
 
         addWardrobeItem(characterName, WardrobeItem.LEATHER_ARMOR);
         addWardrobeItem(characterName, WardrobeItem.LONGSWORD);
@@ -189,7 +189,7 @@ public class CharacterController {
         addTrait(characterName, TraitType.SHIELD_BREAKER);
         addTrait(characterName, TraitType.HEMORRHAGE);
         addTrait(characterName, TraitType.DODGE);
-        addTrait(characterName, TraitType.KICK);
+        addTrait(characterName, TraitType.PARRY);
     }
 
     private void addWardrobeItem(String characterName, WardrobeItem wardrobeItem) throws IOException {
