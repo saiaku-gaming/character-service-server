@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,90 +38,90 @@ import java.util.stream.Collectors;
 @RequestMapping(path = "/v1/character")
 public class CharacterController {
 
-	private static final Logger logger = LoggerFactory.getLogger(CharacterController.class);
+    private static final Logger logger = LoggerFactory.getLogger(CharacterController.class);
 
-	@Autowired
-	private CharacterService characterService;
+    @Autowired
+    private CharacterService characterService;
 
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
-	@Autowired
-	private WardrobeServiceClient wardrobeServiceClient;
+    @Autowired
+    private WardrobeServiceClient wardrobeServiceClient;
 
     @Autowired
     private TraitServiceClient traitServiceClient;
 
-	@RequestMapping(path = "/get-character", method = RequestMethod.POST)
-	@ResponseBody
-	public ResponseEntity<JsonNode> getCharacterWithoutOwnerValidation(
-			@Valid @RequestBody GetCharacterParameter input) {
+    @RequestMapping(path = "/get-character", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<JsonNode> getCharacterWithoutOwnerValidation(
+            @Valid @RequestBody GetCharacterParameter input) {
 
         Optional<Character> optCharacter = characterService.getCharacter(input.getCharacterName());
         if (!optCharacter.isPresent()) {
-			return JS.message(HttpStatus.NOT_FOUND, "No character with that character name was found!");
-		}
+            return JS.message(HttpStatus.NOT_FOUND, "No character with that character name was found!");
+        }
         return JS.message(HttpStatus.OK, optCharacter.get());
-	}
+    }
 
-	@RequestMapping(path = "/get-owned-character", method = RequestMethod.POST)
-	@ResponseBody
-	public ResponseEntity<JsonNode> getCharacterWithOwner(@Valid @RequestBody GetOwnedCharacterParameter input) {
-		Optional<Character> optcharacter = characterService.getCharacter(input.getCharacterName());
-		if (!optcharacter.isPresent()) {
-			return JS.message(HttpStatus.NOT_FOUND, "No character with that character name was found!");
-		}
+    @RequestMapping(path = "/get-owned-character", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<JsonNode> getCharacterWithOwner(@Valid @RequestBody GetOwnedCharacterParameter input) {
+        Optional<Character> optcharacter = characterService.getCharacter(input.getCharacterName());
+        if (!optcharacter.isPresent()) {
+            return JS.message(HttpStatus.NOT_FOUND, "No character with that character name was found!");
+        }
 
-		Character character = optcharacter.get();
-		if (!character.getOwnerUsername().equals(input.getUsername())) {
-			return JS.message(HttpStatus.NOT_FOUND, "Wrong owner!");
-		}
-		return JS.message(HttpStatus.OK, optcharacter.get());
-	}
+        Character character = optcharacter.get();
+        if (!character.getOwnerUsername().equals(input.getUsername())) {
+            return JS.message(HttpStatus.NOT_FOUND, "Wrong owner!");
+        }
+        return JS.message(HttpStatus.OK, optcharacter.get());
+    }
 
-	@RequestMapping(path = "/get-all-characters", method = RequestMethod.POST)
-	@ResponseBody
-	public ResponseEntity<JsonNode> getAllCharacters(@Valid @RequestBody GetAllCharactersParameter input) {
-		return JS.message(HttpStatus.OK, characterService.getCharacters(input.getUsername()));
-	}
+    @RequestMapping(path = "/get-all-characters", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<JsonNode> getAllCharacters(@Valid @RequestBody GetAllCharactersParameter input) {
+        return JS.message(HttpStatus.OK, characterService.getCharacters(input.getUsername()));
+    }
 
-	@RequestMapping(path = "/create-debug-character", method = RequestMethod.POST)
-	@ResponseBody
-	public ResponseEntity<JsonNode> createDebugCharacter(@Valid @RequestBody CreateDebugCharacterParameter input)
-			throws IOException {
-		String charName = input.getDisplayCharacterName().toLowerCase();
-		Optional<Character> localOpt = characterService.getCharacter(charName);
-		if (!localOpt.isPresent()) {
+    @RequestMapping(path = "/create-debug-character", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<JsonNode> createDebugCharacter(@Valid @RequestBody CreateDebugCharacterParameter input)
+            throws IOException {
+        String charName = input.getDisplayCharacterName().toLowerCase();
+        Optional<Character> localOpt = characterService.getCharacter(charName);
+        if (!localOpt.isPresent()) {
 
-			String characterDisplayName = input.getDisplayCharacterName().chars()
-					.mapToObj(c -> String.valueOf((char) c))
-					.map(c -> Math.random() < 0.5 ? c.toUpperCase() : c.toLowerCase()).collect(Collectors.joining());
+            String characterDisplayName = input.getDisplayCharacterName().chars()
+                    .mapToObj(c -> String.valueOf((char) c))
+                    .map(c -> Math.random() < 0.5 ? c.toUpperCase() : c.toLowerCase()).collect(Collectors.joining());
 
-			input.setDisplayCharacterName(characterDisplayName);
+            input.setDisplayCharacterName(characterDisplayName);
 
-			CreateCharacterParameter out = new CreateCharacterParameter(input.getDisplayCharacterName(),
-                    input.getUsername(), "warrior");
+            CreateCharacterParameter out = new CreateCharacterParameter(input.getDisplayCharacterName(),
+                    input.getUsername(), "debug");
 
-			return createCharacter(out);
-		} else {
-			Character character = localOpt.get();
-			character.setOwnerUsername(input.getUsername());
-			characterService.saveCharacter(character);
-		}
-		return JS.message(HttpStatus.OK, "OK");
-	}
+            return createCharacter(out);
+        } else {
+            Character character = localOpt.get();
+            character.setOwnerUsername(input.getUsername());
+            characterService.saveCharacter(character);
+        }
+        return JS.message(HttpStatus.OK, "OK");
+    }
 
-	@RequestMapping(path = "/create-character", method = RequestMethod.POST)
-	@ResponseBody
-	public ResponseEntity<JsonNode> createCharacter(@Valid @RequestBody CreateCharacterParameter input)
-			throws IOException {
+    @RequestMapping(path = "/create-character", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<JsonNode> createCharacter(@Valid @RequestBody CreateCharacterParameter input)
+            throws IOException {
 
         String displayCharacterName = input.getDisplayCharacterName();
         if (displayCharacterName.contains("#")) {
-			return JS.message(HttpStatus.BAD_REQUEST, "# is not allowed in character name");
-		}
+            return JS.message(HttpStatus.BAD_REQUEST, "# is not allowed in character name");
+        }
         Optional<Character> localOpt = characterService.getCharacter(displayCharacterName.toLowerCase());
-		if (!localOpt.isPresent()) {
+        if (!localOpt.isPresent()) {
             Character character = new Character();
             character.setOwnerUsername(input.getUsername());
             character.setDisplayCharacterName(displayCharacterName);
@@ -138,16 +139,42 @@ public class CharacterController {
                 case "ranger":
                     equipAsRanger(character, characterName);
                     break;
+                case "debug":
+                    equipAsDebug(character, characterName);
                 default:
                     throw new IllegalArgumentException(input.getStartingClass() + " is not warrior, shaman or ranger!");
             }
             character = characterService.saveCharacter(character);
             characterService.setSelectedCharacter(character.getOwnerUsername(), character.getCharacterName());
-		} else {
-			return JS.message(HttpStatus.CONFLICT, "Character already exists.");
-		}
-		return JS.message(HttpStatus.OK, "OK");
-	}
+        } else {
+            return JS.message(HttpStatus.CONFLICT, "Character already exists.");
+        }
+        return JS.message(HttpStatus.OK, "OK");
+    }
+
+    private void equipAsDebug(Character character, String characterName) {
+        character.setChestItem(WardrobeItem.MAIL_ARMOR.name());
+        character.setMainhandArmament(WardrobeItem.SWORD.name());
+        character.setOffHandArmament(WardrobeItem.MEDIUM_SHIELD.name());
+
+        Arrays.stream(WardrobeItem.values())
+                .filter(wardrobeItem -> !wardrobeItem.equals(WardrobeItem.NAKED))
+                .forEach(wardrobeItem -> {
+                    try {
+                        addWardrobeItem(characterName, wardrobeItem);
+                    } catch (IOException e) {
+                        logger.error("failed to populate debug character with " + wardrobeItem, e);
+                    }
+                });
+
+        Arrays.stream(TraitType.values()).forEach(val -> {
+            try {
+                addTrait(characterName, val);
+            } catch (IOException e) {
+                logger.error("failed to populate debug character with " + val, e);
+            }
+        });
+    }
 
     private void equipAsWarrior(Character character, String characterName) throws IOException {
         character.setChestItem(WardrobeItem.MAIL_ARMOR.name());
@@ -200,148 +227,148 @@ public class CharacterController {
         traitServiceClient.unlockTrait(new UnlockTraitParameter(characterName, traitType));
     }
 
-	@RequestMapping(path = "/delete-character", method = RequestMethod.POST)
-	@ResponseBody
-	public ResponseEntity<JsonNode> deleteCharacter(@Valid @RequestBody DeleteCharacterParameter input) {
-		String owner = input.getUsername();
-		Optional<Character> localOpt = characterService.getCharacter(input.getDisplayCharacterName().toLowerCase());
-		if (!localOpt.isPresent()) {
-			return JS.message(HttpStatus.NOT_FOUND, "Not found");
-		}
+    @RequestMapping(path = "/delete-character", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<JsonNode> deleteCharacter(@Valid @RequestBody DeleteCharacterParameter input) {
+        String owner = input.getUsername();
+        Optional<Character> localOpt = characterService.getCharacter(input.getDisplayCharacterName().toLowerCase());
+        if (!localOpt.isPresent()) {
+            return JS.message(HttpStatus.NOT_FOUND, "Not found");
+        }
 
-		Character local = localOpt.get();
+        Character local = localOpt.get();
 
-		if (owner.equals(local.getOwnerUsername())) {
-			// Randomly(ish) select a new character as default character if the
-			// person has one.
-			Optional<Character> selectedCharacterOpt = characterService.getSelectedCharacter(owner);
-			if (selectedCharacterOpt.isPresent() && selectedCharacterOpt.get().equals(local)) {
-				characterService.getCharacters(owner).stream().filter(x -> !x.equals(local)).findAny()
-						.ifPresent(ch -> characterService.setSelectedCharacter(owner, ch.getCharacterName()));
-			}
-			characterService.deleteCharacter(local);
+        if (owner.equals(local.getOwnerUsername())) {
+            // Randomly(ish) select a new character as default character if the
+            // person has one.
+            Optional<Character> selectedCharacterOpt = characterService.getSelectedCharacter(owner);
+            if (selectedCharacterOpt.isPresent() && selectedCharacterOpt.get().equals(local)) {
+                characterService.getCharacters(owner).stream().filter(x -> !x.equals(local)).findAny()
+                        .ifPresent(ch -> characterService.setSelectedCharacter(owner, ch.getCharacterName()));
+            }
+            characterService.deleteCharacter(local);
 
-			NotificationMessage notificationMessage = new NotificationMessage(owner, "A character was deleted");
-			notificationMessage.addData("characterName", local.getCharacterName());
+            NotificationMessage notificationMessage = new NotificationMessage(owner, "A character was deleted");
+            notificationMessage.addData("characterName", local.getCharacterName());
 
-			rabbitTemplate.convertAndSend(RabbitMQRouting.Exchange.CHARACTER.name(),
-					RabbitMQRouting.Character.DELETE.name(), notificationMessage);
+            rabbitTemplate.convertAndSend(RabbitMQRouting.Exchange.CHARACTER.name(),
+                    RabbitMQRouting.Character.DELETE.name(), notificationMessage);
 
-			return JS.message(HttpStatus.OK, "Deleted character");
-		} else {
-			return JS.message(HttpStatus.FORBIDDEN, "No access");
-		}
-	}
+            return JS.message(HttpStatus.OK, "Deleted character");
+        } else {
+            return JS.message(HttpStatus.FORBIDDEN, "No access");
+        }
+    }
 
-	@RequestMapping(path = "/character-available", method = RequestMethod.POST)
-	@ResponseBody
-	public ResponseEntity<JsonNode> characterAvailable(@Valid @RequestBody CharacterAvailableParameter input) {
-		if (input.getCharacterName() == null || input.getCharacterName().isEmpty()) {
-			return JS.message(HttpStatus.BAD_REQUEST, "Missing characterName field");
-		}
+    @RequestMapping(path = "/character-available", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<JsonNode> characterAvailable(@Valid @RequestBody CharacterAvailableParameter input) {
+        if (input.getCharacterName() == null || input.getCharacterName().isEmpty()) {
+            return JS.message(HttpStatus.BAD_REQUEST, "Missing characterName field");
+        }
 
-		if (input.getCharacterName().contains("#")) {
-			return JS.message(HttpStatus.BAD_REQUEST, "# is not allowed in character name");
-		}
+        if (input.getCharacterName().contains("#")) {
+            return JS.message(HttpStatus.BAD_REQUEST, "# is not allowed in character name");
+        }
 
-		Optional<Character> localOpt = characterService.getCharacter(input.getCharacterName());
-		if (localOpt.isPresent()) {
-			return JS.message(HttpStatus.CONFLICT, "Character not available");
-		} else {
-			return JS.message(HttpStatus.OK, "Character available");
-		}
-	}
+        Optional<Character> localOpt = characterService.getCharacter(input.getCharacterName());
+        if (localOpt.isPresent()) {
+            return JS.message(HttpStatus.CONFLICT, "Character not available");
+        } else {
+            return JS.message(HttpStatus.OK, "Character available");
+        }
+    }
 
-	@RequestMapping(path = "/select-character", method = RequestMethod.POST)
-	@ResponseBody
-	public ResponseEntity<JsonNode> selectCharacter(@Valid @RequestBody SelectCharacterParameter input) {
-		String characterName = input.getDisplayCharacterName().toLowerCase();
-		Optional<Character> localOpt = characterService.getCharacter(characterName);
-		if (!localOpt.isPresent()) {
-			return JS.message(HttpStatus.NOT_FOUND,
-					"Character with name " + characterName + " was not found.");
-		} else {
-			if (!localOpt.get().getOwnerUsername().equals(input.getUsername())) {
-				return JS.message(HttpStatus.FORBIDDEN, "You don't own that character.");
-			}
-			characterService.setSelectedCharacter(input.getUsername(), characterName);
-			return JS.message(HttpStatus.OK, "Character selected");
-		}
-	}
+    @RequestMapping(path = "/select-character", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<JsonNode> selectCharacter(@Valid @RequestBody SelectCharacterParameter input) {
+        String characterName = input.getDisplayCharacterName().toLowerCase();
+        Optional<Character> localOpt = characterService.getCharacter(characterName);
+        if (!localOpt.isPresent()) {
+            return JS.message(HttpStatus.NOT_FOUND,
+                    "Character with name " + characterName + " was not found.");
+        } else {
+            if (!localOpt.get().getOwnerUsername().equals(input.getUsername())) {
+                return JS.message(HttpStatus.FORBIDDEN, "You don't own that character.");
+            }
+            characterService.setSelectedCharacter(input.getUsername(), characterName);
+            return JS.message(HttpStatus.OK, "Character selected");
+        }
+    }
 
-	@RequestMapping(path = "/get-selected-character", method = RequestMethod.POST)
-	@ResponseBody
-	public ResponseEntity<JsonNode> getSelectedCharacter(@Valid @RequestBody GetSelectedCharacterParameter input) {
-		Optional<Character> selectedCharacter = characterService.getSelectedCharacter(input.getUsername());
-		if (selectedCharacter.isPresent()) {
-			return JS.message(HttpStatus.OK, selectedCharacter.get());
-		} else {
-			return JS.message(HttpStatus.NOT_FOUND, "No character selected");
-		}
-	}
+    @RequestMapping(path = "/get-selected-character", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<JsonNode> getSelectedCharacter(@Valid @RequestBody GetSelectedCharacterParameter input) {
+        Optional<Character> selectedCharacter = characterService.getSelectedCharacter(input.getUsername());
+        if (selectedCharacter.isPresent()) {
+            return JS.message(HttpStatus.OK, selectedCharacter.get());
+        } else {
+            return JS.message(HttpStatus.NOT_FOUND, "No character selected");
+        }
+    }
 
-	@RequestMapping(path = "/save-equipped-items", method = RequestMethod.POST)
-	@ResponseBody
-	public ResponseEntity<JsonNode> saveEquippedItems(@Valid @RequestBody SaveEquippedItemsParameter input)
-			throws IOException {
+    @RequestMapping(path = "/save-equipped-items", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<JsonNode> saveEquippedItems(@Valid @RequestBody SaveEquippedItemsParameter input)
+            throws IOException {
 
-		logger.info("Saving equipment {}", input);
+        logger.info("Saving equipment {}", input);
 
-		Optional<Character> selectedCharacterOpt = characterService.getCharacter(input.getCharacterName());
-		if (selectedCharacterOpt.isPresent()) {
-			Character character = selectedCharacterOpt.get();
-			RestResponse<List<String>> wardrobeItems = wardrobeServiceClient
-					.getWardrobeItems(character.getOwnerUsername());
+        Optional<Character> selectedCharacterOpt = characterService.getCharacter(input.getCharacterName());
+        if (selectedCharacterOpt.isPresent()) {
+            Character character = selectedCharacterOpt.get();
+            RestResponse<List<String>> wardrobeItems = wardrobeServiceClient
+                    .getWardrobeItems(character.getOwnerUsername());
 
-			List<String> items = wardrobeItems.getResponse().orElse(new ArrayList<String>());
-			items.add("NONE");
-			for (EquippedItemParameter equippedItem : input.getEquippedItems()) {
-				if (!equippCharacter(character, items, equippedItem)) {
-					return JS.message(HttpStatus.BAD_REQUEST,
-							"Your character %s tried to equip %s but can only equip items: %s", character, equippedItem,
-							items);
-				}
-			}
-			Character saveCharacter = characterService.saveCharacter(character);
-			return JS.message(HttpStatus.OK, saveCharacter);
-		} else {
-			return JS.message(HttpStatus.NOT_FOUND, "No character with that id");
-		}
-	}
+            List<String> items = wardrobeItems.getResponse().orElse(new ArrayList<String>());
+            items.add("NONE");
+            for (EquippedItemParameter equippedItem : input.getEquippedItems()) {
+                if (!equippCharacter(character, items, equippedItem)) {
+                    return JS.message(HttpStatus.BAD_REQUEST,
+                            "Your character %s tried to equip %s but can only equip items: %s", character, equippedItem,
+                            items);
+                }
+            }
+            Character saveCharacter = characterService.saveCharacter(character);
+            return JS.message(HttpStatus.OK, saveCharacter);
+        } else {
+            return JS.message(HttpStatus.NOT_FOUND, "No character with that id");
+        }
+    }
 
-	private boolean equippCharacter(Character character, List<String> items, EquippedItemParameter equippedItem) {
-		String armament = equippedItem.getArmament();
-		String armor = equippedItem.getArmor();
-		String itemSlot = equippedItem.getItemSlot();
-		switch (itemSlot) {
-		case "MAINHAND":
-			if (items.contains(armament)) {
-				character.setMainhandArmament(armament);
-				return true;
-			} else {
-				logger.error("wardrobe does not have armament {} in {} ", armament, items);
-				return false;
-			}
-		case "OFFHAND":
-			if (items.contains(armament)) {
-				character.setOffHandArmament(armament);
-				return true;
-			} else {
-				logger.error("wardrobe does not have armament {} in {}", armament, items);
-				return false;
-			}
-		case "CHEST":
-			if (items.contains(armor)) {
-				character.setChestItem(armor);
-				return true;
-			} else {
-				logger.error("wardrobe does not have armor {} in {}", armor, items);
-				return false;
-			}
-		default:
-			logger.error("{} DOES NOT EXIST AS A SLOT!", itemSlot);
-			return false;
-		}
-	}
+    private boolean equippCharacter(Character character, List<String> items, EquippedItemParameter equippedItem) {
+        String armament = equippedItem.getArmament();
+        String armor = equippedItem.getArmor();
+        String itemSlot = equippedItem.getItemSlot();
+        switch (itemSlot) {
+            case "MAINHAND":
+                if (items.contains(armament)) {
+                    character.setMainhandArmament(armament);
+                    return true;
+                } else {
+                    logger.error("wardrobe does not have armament {} in {} ", armament, items);
+                    return false;
+                }
+            case "OFFHAND":
+                if (items.contains(armament)) {
+                    character.setOffHandArmament(armament);
+                    return true;
+                } else {
+                    logger.error("wardrobe does not have armament {} in {}", armament, items);
+                    return false;
+                }
+            case "CHEST":
+                if (items.contains(armor)) {
+                    character.setChestItem(armor);
+                    return true;
+                } else {
+                    logger.error("wardrobe does not have armor {} in {}", armor, items);
+                    return false;
+                }
+            default:
+                logger.error("{} DOES NOT EXIST AS A SLOT!", itemSlot);
+                return false;
+        }
+    }
 
 }
