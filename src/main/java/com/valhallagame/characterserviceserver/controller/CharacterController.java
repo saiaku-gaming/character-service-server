@@ -141,6 +141,7 @@ public class CharacterController {
                     break;
                 case "debug":
                     equipAsDebug(character, characterName);
+                    break;
                 default:
                     throw new IllegalArgumentException(input.getStartingClass() + " is not warrior, shaman or ranger!");
             }
