@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>character-service-server</artifactId>
-	<version>1.0</version>
+	<version>1.1</version>
 	<packaging>jar</packaging>
 	<groupId>com.valhallagame.valhalla</groupId>
 	<name>Character Service Server</name>
@@ -18,6 +18,17 @@
 	<properties>
 		<docker.image.prefix>saiaku</docker.image.prefix>
 	</properties>
+
+	<repositories>
+		<repository>
+			<id>valhalla-release</id>
+			<url>https://artifactory.valhalla-game.com/libs-release</url>
+		</repository>
+		<repository>
+			<id>valhalla-snapshot</id>
+			<url>https://artifactory.valhalla-game.com/libs-snapshot</url>
+		</repository>
+	</repositories>
 
 	<dependencies>
 		<dependency>
