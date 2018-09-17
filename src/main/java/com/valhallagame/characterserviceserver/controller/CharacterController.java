@@ -40,6 +40,7 @@ public class CharacterController {
 
     private static final Logger logger = LoggerFactory.getLogger(CharacterController.class);
 
+
     @Autowired
     private CharacterService characterService;
 
@@ -111,6 +112,26 @@ public class CharacterController {
         return JS.message(HttpStatus.OK, "OK");
     }
 
+    private enum AllowedClasses {
+        WARRIOR,
+        SHAMAN,
+        RANGER,
+        DEBUG;
+
+        static AllowedClasses get(String enumStringValue){
+            return AllowedClasses.valueOf(enumStringValue.toUpperCase());
+        }
+
+        static boolean has(String enumStringValue){
+            try{
+                get(enumStringValue);
+                return true;
+            } catch (IllegalArgumentException e){
+                return false;
+            }
+        }
+    }
+
     @RequestMapping(path = "/create-character", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<JsonNode> createCharacter(@Valid @RequestBody CreateCharacterParameter input)
@@ -129,22 +150,25 @@ public class CharacterController {
             String characterName = input.getDisplayCharacterName().toLowerCase();
             character.setCharacterName(characterName);
 
-            switch (input.getStartingClass()) {
-                case "warrior":
+            if(!AllowedClasses.has(input.getStartingClass())){
+                return JS.message(HttpStatus.BAD_REQUEST, input.getStartingClass() + " is not a starting class");
+            }
+
+            switch (AllowedClasses.get(input.getStartingClass())) {
+                case WARRIOR:
                     equipAsWarrior(character, characterName);
                     break;
-                case "shaman":
+                case SHAMAN:
                     equipAsShaman(character, characterName);
                     break;
-                case "ranger":
+                case RANGER:
                     equipAsRanger(character, characterName);
                     break;
-                case "debug":
+                case DEBUG:
                     equipAsDebug(character, characterName);
                     break;
-                default:
-                    throw new IllegalArgumentException(input.getStartingClass() + " is not warrior, shaman or ranger!");
             }
+
             character = characterService.saveCharacter(character);
             characterService.setSelectedCharacter(character.getOwnerUsername(), character.getCharacterName());
         } else {
