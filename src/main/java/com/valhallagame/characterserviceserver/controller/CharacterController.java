@@ -8,12 +8,7 @@ import com.valhallagame.common.JS;
 import com.valhallagame.common.RestResponse;
 import com.valhallagame.common.rabbitmq.NotificationMessage;
 import com.valhallagame.common.rabbitmq.RabbitMQRouting;
-import com.valhallagame.traitserviceclient.TraitServiceClient;
-import com.valhallagame.traitserviceclient.message.TraitType;
-import com.valhallagame.traitserviceclient.message.UnlockTraitParameter;
 import com.valhallagame.wardrobeserviceclient.WardrobeServiceClient;
-import com.valhallagame.wardrobeserviceclient.message.AddWardrobeItemParameter;
-import com.valhallagame.wardrobeserviceclient.message.WardrobeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -29,7 +24,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,7 +34,6 @@ public class CharacterController {
 
     private static final Logger logger = LoggerFactory.getLogger(CharacterController.class);
 
-
     @Autowired
     private CharacterService characterService;
 
@@ -49,9 +42,6 @@ public class CharacterController {
 
     @Autowired
     private WardrobeServiceClient wardrobeServiceClient;
-
-    @Autowired
-    private TraitServiceClient traitServiceClient;
 
     @RequestMapping(path = "/get-character", method = RequestMethod.POST)
     @ResponseBody
@@ -112,26 +102,6 @@ public class CharacterController {
         return JS.message(HttpStatus.OK, "OK");
     }
 
-    private enum AllowedClasses {
-        WARRIOR,
-        SHAMAN,
-        RANGER,
-        DEBUG;
-
-        static AllowedClasses get(String enumStringValue){
-            return AllowedClasses.valueOf(enumStringValue.toUpperCase());
-        }
-
-        static boolean has(String enumStringValue){
-            try{
-                get(enumStringValue);
-                return true;
-            } catch (IllegalArgumentException e){
-                return false;
-            }
-        }
-    }
-
     @RequestMapping(path = "/create-character", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<JsonNode> createCharacter(@Valid @RequestBody CreateCharacterParameter input)
@@ -143,113 +113,11 @@ public class CharacterController {
         }
         Optional<Character> localOpt = characterService.getCharacter(displayCharacterName.toLowerCase());
         if (!localOpt.isPresent()) {
-            Character character = new Character();
-            character.setOwnerUsername(input.getUsername());
-            character.setDisplayCharacterName(displayCharacterName);
-
-            String characterName = input.getDisplayCharacterName().toLowerCase();
-            character.setCharacterName(characterName);
-
-            if(!AllowedClasses.has(input.getStartingClass())){
-                return JS.message(HttpStatus.BAD_REQUEST, input.getStartingClass() + " is not a starting class");
-            }
-
-            switch (AllowedClasses.get(input.getStartingClass())) {
-                case WARRIOR:
-                    equipAsWarrior(character, characterName);
-                    break;
-                case SHAMAN:
-                    equipAsShaman(character, characterName);
-                    break;
-                case RANGER:
-                    equipAsRanger(character, characterName);
-                    break;
-                case DEBUG:
-                    equipAsDebug(character, characterName);
-                    break;
-            }
-
-            character = characterService.saveCharacter(character);
-            characterService.setSelectedCharacter(character.getOwnerUsername(), character.getCharacterName());
+            characterService.createCharacter(input.getUsername(), input.getDisplayCharacterName(), input.getStartingClass());
         } else {
             return JS.message(HttpStatus.CONFLICT, "Character already exists.");
         }
         return JS.message(HttpStatus.OK, "OK");
-    }
-
-    private void equipAsDebug(Character character, String characterName) {
-        character.setChestItem(WardrobeItem.MAIL_ARMOR.name());
-        character.setMainhandArmament(WardrobeItem.SWORD.name());
-        character.setOffHandArmament(WardrobeItem.MEDIUM_SHIELD.name());
-
-        Arrays.stream(WardrobeItem.values())
-                .filter(wardrobeItem -> !wardrobeItem.equals(WardrobeItem.NAKED))
-                .forEach(wardrobeItem -> {
-                    try {
-                        addWardrobeItem(characterName, wardrobeItem);
-                    } catch (IOException e) {
-                        logger.error("failed to populate debug character with " + wardrobeItem, e);
-                    }
-                });
-
-        Arrays.stream(TraitType.values()).forEach(val -> {
-            try {
-                addTrait(characterName, val);
-            } catch (IOException e) {
-                logger.error("failed to populate debug character with " + val, e);
-            }
-        });
-    }
-
-    private void equipAsWarrior(Character character, String characterName) throws IOException {
-        character.setChestItem(WardrobeItem.MAIL_ARMOR.name());
-        character.setMainhandArmament(WardrobeItem.SWORD.name());
-        character.setOffHandArmament(WardrobeItem.MEDIUM_SHIELD.name());
-
-        addWardrobeItem(characterName, WardrobeItem.MAIL_ARMOR);
-        addWardrobeItem(characterName, WardrobeItem.SWORD);
-        addWardrobeItem(characterName, WardrobeItem.MEDIUM_SHIELD);
-
-        addTrait(characterName, TraitType.SHIELD_BASH);
-        addTrait(characterName, TraitType.RECOVER);
-        addTrait(characterName, TraitType.TAUNT);
-        addTrait(characterName, TraitType.KICK);
-    }
-
-    private void equipAsShaman(Character character, String characterName) throws IOException {
-        character.setChestItem(WardrobeItem.CLOTH_ARMOR.name());
-        character.setMainhandArmament(WardrobeItem.SWORD.name());
-        character.setOffHandArmament("NONE");
-
-        addWardrobeItem(characterName, WardrobeItem.CLOTH_ARMOR);
-        addWardrobeItem(characterName, WardrobeItem.SWORD);
-
-        addTrait(characterName, TraitType.FROST_BLAST);
-        addTrait(characterName, TraitType.SEIDHRING);
-        addTrait(characterName, TraitType.PETRIFY);
-        addTrait(characterName, TraitType.FRIGGS_INTERVENTION);
-    }
-
-    private void equipAsRanger(Character character, String characterName) throws IOException {
-        character.setChestItem(WardrobeItem.LEATHER_ARMOR.name());
-        character.setMainhandArmament(WardrobeItem.LONGSWORD.name());
-        character.setOffHandArmament("NONE");
-
-        addWardrobeItem(characterName, WardrobeItem.LEATHER_ARMOR);
-        addWardrobeItem(characterName, WardrobeItem.LONGSWORD);
-
-        addTrait(characterName, TraitType.SHIELD_BREAKER);
-        addTrait(characterName, TraitType.HEMORRHAGE);
-        addTrait(characterName, TraitType.DODGE);
-        addTrait(characterName, TraitType.PARRY);
-    }
-
-    private void addWardrobeItem(String characterName, WardrobeItem wardrobeItem) throws IOException {
-        wardrobeServiceClient.addWardrobeItem(new AddWardrobeItemParameter(characterName, wardrobeItem));
-    }
-
-    private void addTrait(String characterName, TraitType traitType) throws IOException {
-        traitServiceClient.unlockTrait(new UnlockTraitParameter(characterName, traitType));
     }
 
     @RequestMapping(path = "/delete-character", method = RequestMethod.POST)
@@ -345,7 +213,7 @@ public class CharacterController {
             RestResponse<List<String>> wardrobeItems = wardrobeServiceClient
                     .getWardrobeItems(character.getOwnerUsername());
 
-            List<String> items = wardrobeItems.getResponse().orElse(new ArrayList<String>());
+            List<String> items = wardrobeItems.getResponse().orElse(new ArrayList<>());
             items.add("NONE");
             for (EquippedItemParameter equippedItem : input.getEquippedItems()) {
                 if (!equippCharacter(character, items, equippedItem)) {

@@ -105,6 +105,11 @@
 			<artifactId>trait-service-client</artifactId>
 			<version>1.0</version>
 		</dependency>
+		<dependency>
+			<groupId>com.valhallagame.valhalla</groupId>
+			<artifactId>currency-service-client</artifactId>
+			<version>1.6</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
