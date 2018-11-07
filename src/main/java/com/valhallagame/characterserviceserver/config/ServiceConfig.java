@@ -1,6 +1,7 @@
 package com.valhallagame.characterserviceserver.config;
 
 import com.valhallagame.common.DefaultServicePortMappings;
+import com.valhallagame.currencyserviceclient.CurrencyServiceClient;
 import com.valhallagame.traitserviceclient.TraitServiceClient;
 import com.valhallagame.wardrobeserviceclient.WardrobeServiceClient;
 import org.springframework.context.annotation.Bean;
@@ -20,5 +21,11 @@ public class ServiceConfig {
 	public TraitServiceClient traitServiceClient() {
 		TraitServiceClient.init("http://trait-service:" + DefaultServicePortMappings.TRAIT_SERVICE_PORT);
 		return TraitServiceClient.get();
+	}
+
+	@Bean
+	public CurrencyServiceClient currencyServiceClient() {
+		CurrencyServiceClient.init("http://currency-service:" + DefaultServicePortMappings.CURRENCY_SERVICE_PORT);
+		return CurrencyServiceClient.get();
 	}
 }
