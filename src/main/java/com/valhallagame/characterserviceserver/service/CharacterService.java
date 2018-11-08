@@ -27,24 +27,28 @@ import java.util.Optional;
 
 @Service
 public class CharacterService {
-	@Autowired
-	private CharacterRepository characterRepository;
+    private final CharacterRepository characterRepository;
 
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
+    private final RabbitTemplate rabbitTemplate;
 
-	@Autowired
-	private WardrobeServiceClient wardrobeServiceClient;
+    private final WardrobeServiceClient wardrobeServiceClient;
 
-	@Autowired
-	private TraitServiceClient traitServiceClient;
+    private final TraitServiceClient traitServiceClient;
 
-	@Autowired
-	private CurrencyServiceClient currencyServiceClient;
+    private final CurrencyServiceClient currencyServiceClient;
 
-	private static Logger logger = LoggerFactory.getLogger(CharacterService.class);
+    private static Logger logger = LoggerFactory.getLogger(CharacterService.class);
 
-	public Character saveCharacter(Character character) {
+    @Autowired
+    public CharacterService(CharacterRepository characterRepository, RabbitTemplate rabbitTemplate, WardrobeServiceClient wardrobeServiceClient, TraitServiceClient traitServiceClient, CurrencyServiceClient currencyServiceClient) {
+        this.characterRepository = characterRepository;
+        this.rabbitTemplate = rabbitTemplate;
+        this.wardrobeServiceClient = wardrobeServiceClient;
+        this.traitServiceClient = traitServiceClient;
+        this.currencyServiceClient = currencyServiceClient;
+    }
+
+    public Character saveCharacter(Character character) {
 		return characterRepository.save(character);
 	}
 
@@ -171,7 +175,7 @@ public class CharacterService {
 
 		addTrait(characterName, TraitType.SHIELD_BREAKER);
 		addTrait(characterName, TraitType.HEMORRHAGE);
-		addTrait(characterName, TraitType.DODGE);
+        addTrait(characterName, TraitType.GUNGNIRS_WRATH);
 		addTrait(characterName, TraitType.PARRY);
 	}
 
