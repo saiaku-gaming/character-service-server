@@ -5,10 +5,8 @@ import com.valhallagame.characterserviceclient.message.*;
 import com.valhallagame.characterserviceserver.model.Character;
 import com.valhallagame.characterserviceserver.service.CharacterService;
 import com.valhallagame.common.JS;
-import com.valhallagame.common.RestResponse;
 import com.valhallagame.common.rabbitmq.NotificationMessage;
 import com.valhallagame.common.rabbitmq.RabbitMQRouting;
-import com.valhallagame.wardrobeserviceclient.WardrobeServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -23,8 +21,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -39,9 +35,6 @@ public class CharacterController {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
-
-    @Autowired
-    private WardrobeServiceClient wardrobeServiceClient;
 
     @RequestMapping(path = "/get-character", method = RequestMethod.POST)
     @ResponseBody
@@ -202,25 +195,16 @@ public class CharacterController {
 
     @RequestMapping(path = "/save-equipped-items", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<JsonNode> saveEquippedItems(@Valid @RequestBody SaveEquippedItemsParameter input)
-            throws IOException {
+    public ResponseEntity<JsonNode> saveEquippedItems(@Valid @RequestBody SaveEquippedItemsParameter input) {
 
         logger.info("Saving equipment {}", input);
 
         Optional<Character> selectedCharacterOpt = characterService.getCharacter(input.getCharacterName());
         if (selectedCharacterOpt.isPresent()) {
             Character character = selectedCharacterOpt.get();
-            RestResponse<List<String>> wardrobeItems = wardrobeServiceClient
-                    .getWardrobeItems(character.getOwnerUsername());
 
-            List<String> items = wardrobeItems.getResponse().orElse(new ArrayList<>());
-            items.add("NONE");
             for (EquippedItemParameter equippedItem : input.getEquippedItems()) {
-                if (!equippCharacter(character, items, equippedItem)) {
-                    return JS.message(HttpStatus.BAD_REQUEST,
-                            "Your character %s tried to equip %s but can only equip items: %s", character, equippedItem,
-                            items);
-                }
+                equippCharacter(character, equippedItem);
             }
             Character saveCharacter = characterService.saveCharacter(character);
             return JS.message(HttpStatus.OK, saveCharacter);
@@ -229,38 +213,23 @@ public class CharacterController {
         }
     }
 
-    private boolean equippCharacter(Character character, List<String> items, EquippedItemParameter equippedItem) {
+    private void equippCharacter(Character character, EquippedItemParameter equippedItem) {
         String armament = equippedItem.getArmament();
         String armor = equippedItem.getArmor();
         String itemSlot = equippedItem.getItemSlot();
         switch (itemSlot) {
             case "MAINHAND":
-                if (items.contains(armament)) {
-                    character.setMainhandArmament(armament);
-                    return true;
-                } else {
-                    logger.error("wardrobe does not have armament {} in {} ", armament, items);
-                    return false;
-                }
+                character.setMainhandArmament(armament);
+                break;
             case "OFFHAND":
-                if (items.contains(armament)) {
-                    character.setOffHandArmament(armament);
-                    return true;
-                } else {
-                    logger.error("wardrobe does not have armament {} in {}", armament, items);
-                    return false;
-                }
+                character.setOffHandArmament(armament);
+                break;
             case "CHEST":
-                if (items.contains(armor)) {
-                    character.setChestItem(armor);
-                    return true;
-                } else {
-                    logger.error("wardrobe does not have armor {} in {}", armor, items);
-                    return false;
-                }
+                character.setChestItem(armor);
+                break;
             default:
                 logger.error("{} DOES NOT EXIST AS A SLOT!", itemSlot);
-                return false;
+                break;
         }
     }
 

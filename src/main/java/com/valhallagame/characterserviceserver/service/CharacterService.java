@@ -11,8 +11,6 @@ import com.valhallagame.traitserviceclient.message.AttributeType;
 import com.valhallagame.traitserviceclient.message.SkillTraitParameter;
 import com.valhallagame.traitserviceclient.message.TraitType;
 import com.valhallagame.traitserviceclient.message.UnlockTraitParameter;
-import com.valhallagame.wardrobeserviceclient.WardrobeServiceClient;
-import com.valhallagame.wardrobeserviceclient.message.AddWardrobeItemParameter;
 import com.valhallagame.wardrobeserviceclient.message.WardrobeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +29,6 @@ public class CharacterService {
 
     private final RabbitTemplate rabbitTemplate;
 
-    private final WardrobeServiceClient wardrobeServiceClient;
-
     private final TraitServiceClient traitServiceClient;
 
     private final CurrencyServiceClient currencyServiceClient;
@@ -40,10 +36,9 @@ public class CharacterService {
     private static Logger logger = LoggerFactory.getLogger(CharacterService.class);
 
     @Autowired
-    public CharacterService(CharacterRepository characterRepository, RabbitTemplate rabbitTemplate, WardrobeServiceClient wardrobeServiceClient, TraitServiceClient traitServiceClient, CurrencyServiceClient currencyServiceClient) {
+    public CharacterService(CharacterRepository characterRepository, RabbitTemplate rabbitTemplate, TraitServiceClient traitServiceClient, CurrencyServiceClient currencyServiceClient) {
         this.characterRepository = characterRepository;
         this.rabbitTemplate = rabbitTemplate;
-        this.wardrobeServiceClient = wardrobeServiceClient;
         this.traitServiceClient = traitServiceClient;
         this.currencyServiceClient = currencyServiceClient;
     }
@@ -117,16 +112,6 @@ public class CharacterService {
 		character.setMainhandArmament(WardrobeItem.SWORD.name());
 		character.setOffHandArmament(WardrobeItem.MEDIUM_SHIELD.name());
 
-		Arrays.stream(WardrobeItem.values())
-				.filter(wardrobeItem -> !wardrobeItem.equals(WardrobeItem.NAKED))
-				.forEach(wardrobeItem -> {
-					try {
-						addWardrobeItem(characterName, wardrobeItem);
-					} catch (IOException e) {
-						logger.error("failed to populate debug character with " + wardrobeItem, e);
-					}
-				});
-
 		Arrays.stream(TraitType.values()).forEach(val -> {
 			try {
 				addTrait(characterName, val);
@@ -141,10 +126,6 @@ public class CharacterService {
 		character.setMainhandArmament(WardrobeItem.SWORD.name());
 		character.setOffHandArmament(WardrobeItem.MEDIUM_SHIELD.name());
 
-		addWardrobeItem(characterName, WardrobeItem.MAIL_ARMOR);
-		addWardrobeItem(characterName, WardrobeItem.SWORD);
-		addWardrobeItem(characterName, WardrobeItem.MEDIUM_SHIELD);
-
 		addTrait(characterName, TraitType.SHIELD_BASH);
 		addTrait(characterName, TraitType.RECOVER);
 		addTrait(characterName, TraitType.TAUNT);
@@ -155,9 +136,6 @@ public class CharacterService {
 		character.setChestItem(WardrobeItem.CLOTH_ARMOR.name());
 		character.setMainhandArmament(WardrobeItem.SWORD.name());
 		character.setOffHandArmament("NONE");
-
-		addWardrobeItem(characterName, WardrobeItem.CLOTH_ARMOR);
-		addWardrobeItem(characterName, WardrobeItem.SWORD);
 
 		addTrait(characterName, TraitType.FROST_BLAST);
 		addTrait(characterName, TraitType.SEIDHRING);
@@ -170,17 +148,10 @@ public class CharacterService {
 		character.setMainhandArmament(WardrobeItem.LONGSWORD.name());
 		character.setOffHandArmament("NONE");
 
-		addWardrobeItem(characterName, WardrobeItem.LEATHER_ARMOR);
-		addWardrobeItem(characterName, WardrobeItem.LONGSWORD);
-
 		addTrait(characterName, TraitType.SHIELD_BREAKER);
 		addTrait(characterName, TraitType.HEMORRHAGE);
         addTrait(characterName, TraitType.GUNGNIRS_WRATH);
 		addTrait(characterName, TraitType.PARRY);
-	}
-
-	private void addWardrobeItem(String characterName, WardrobeItem wardrobeItem) throws IOException {
-		wardrobeServiceClient.addWardrobeItem(new AddWardrobeItemParameter(characterName, wardrobeItem));
 	}
 
 	private void addTrait(String characterName, TraitType traitType) throws IOException {
