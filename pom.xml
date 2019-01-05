@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>character-service-server</artifactId>
-	<version>1.5</version>
+	<version>1.6</version>
 	<packaging>jar</packaging>
 	<groupId>com.valhallagame.valhalla</groupId>
 	<name>Character Service Server</name>
@@ -66,7 +66,7 @@
 		<dependency>
 			<groupId>com.valhallagame.valhalla</groupId>
 			<artifactId>common</artifactId>
-            <version>1.5</version>
+			<version>1.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -93,22 +93,22 @@
 		<dependency>
 			<groupId>com.valhallagame.valhalla</groupId>
 			<artifactId>wardrobe-service-client</artifactId>
-			<version>1.0</version>
+			<version>1.3</version>
 		</dependency>
 		<dependency>
 			<groupId>com.valhallagame.valhalla</groupId>
 			<artifactId>character-service-client</artifactId>
-			<version>1.0</version>
+			<version>1.4</version>
 		</dependency>
 		<dependency>
 			<groupId>com.valhallagame.valhalla</groupId>
 			<artifactId>trait-service-client</artifactId>
-            <version>1.4</version>
+            <version>1.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.valhallagame.valhalla</groupId>
 			<artifactId>currency-service-client</artifactId>
-			<version>1.6</version>
+			<version>1.7</version>
 		</dependency>
 	</dependencies>
 	<build>
