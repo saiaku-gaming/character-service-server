@@ -103,7 +103,7 @@
 		<dependency>
 			<groupId>com.valhallagame.valhalla</groupId>
 			<artifactId>trait-service-client</artifactId>
-			<version>1.0</version>
+            <version>1.4</version>
 		</dependency>
 		<dependency>
 			<groupId>com.valhallagame.valhalla</groupId>

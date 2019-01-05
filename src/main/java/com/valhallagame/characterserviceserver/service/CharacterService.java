@@ -97,7 +97,7 @@ public class CharacterService {
 		}
 
 		addTrait(characterName, TraitType.DODGE);
-		SkillTraitParameter skillTraitParameter = new SkillTraitParameter(characterName, TraitType.DODGE, AttributeType.AGILITY);
+		SkillTraitParameter skillTraitParameter = new SkillTraitParameter(characterName, TraitType.DODGE, AttributeType.AGILITY, 0);
 		traitServiceClient.skillTrait(skillTraitParameter);
 
 		currencyServiceClient.addCurrency(characterName, CurrencyType.GOLD, 50);
