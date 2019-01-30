@@ -224,8 +224,23 @@ public class CharacterController {
             case "OFFHAND":
                 character.setOffHandArmament(armament);
                 break;
+            case "HEAD":
+                character.setHeadItem(armor);
+                break;
+            case "BEARD":
+                character.setBeardItem(armor);
+                break;
             case "CHEST":
                 character.setChestItem(armor);
+                break;
+            case "HANDS":
+                character.setHandsItem(armor);
+                break;
+            case "LEGS":
+                character.setLegsItem(armor);
+                break;
+            case "FEET":
+                character.setFeetItem(armor);
                 break;
             default:
                 logger.error("{} DOES NOT EXIST AS A SLOT!", itemSlot);
