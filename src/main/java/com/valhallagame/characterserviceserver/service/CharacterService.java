@@ -108,7 +108,13 @@ public class CharacterService {
 	}
 
 	private void equipAsDebug(Character character, String characterName) {
-		character.setChestItem(WardrobeItem.MAIL_ARMOR.name());
+		character.setHeadItem("NONE");
+		character.setBeardItem("NONE");
+		character.setChestItem("HEAVY_HIDE_CHESTPIECE");
+		character.setHandsItem("NONE");
+		character.setLegsItem("REINFORCED_LEATHER_PANTS");
+		character.setFeetItem("FORTIFIED_BOOTS");
+
 		character.setMainhandArmament(WardrobeItem.SWORD.name());
 		character.setOffHandArmament(WardrobeItem.MEDIUM_SHIELD.name());
 
@@ -122,7 +128,13 @@ public class CharacterService {
 	}
 
 	private void equipAsWarrior(Character character, String characterName) throws IOException {
-		character.setChestItem(WardrobeItem.MAIL_ARMOR.name());
+		character.setHeadItem("NONE");
+		character.setBeardItem("NONE");
+    	character.setChestItem("HEAVY_HIDE_CHESTPIECE");
+		character.setHandsItem("NONE");
+		character.setLegsItem("REINFORCED_LEATHER_PANTS");
+		character.setFeetItem("FORTIFIED_BOOTS");
+
 		character.setMainhandArmament(WardrobeItem.SWORD.name());
 		character.setOffHandArmament(WardrobeItem.MEDIUM_SHIELD.name());
 
@@ -133,7 +145,13 @@ public class CharacterService {
 	}
 
 	private void equipAsShaman(Character character, String characterName) throws IOException {
-		character.setChestItem(WardrobeItem.CLOTH_ARMOR.name());
+		character.setHeadItem("NONE");
+		character.setBeardItem("NONE");
+    	character.setChestItem("CLOTH_TUNIC");
+		character.setHandsItem("NONE");
+		character.setLegsItem("SILKEN_PANTS");
+		character.setFeetItem("APPRENTICES_BOOTS");
+
 		character.setMainhandArmament(WardrobeItem.SWORD.name());
 		character.setOffHandArmament("NONE");
 
@@ -144,7 +162,13 @@ public class CharacterService {
 	}
 
 	private void equipAsRanger(Character character, String characterName) throws IOException {
-		character.setChestItem(WardrobeItem.LEATHER_ARMOR.name());
+		character.setHeadItem("NONE");
+		character.setBeardItem("NONE");
+		character.setChestItem("RANGERS_HARNESS");
+		character.setHandsItem("NONE");
+		character.setLegsItem("LEATHER_BREECHES");
+		character.setFeetItem("LEATHER_BOOTS");
+
 		character.setMainhandArmament(WardrobeItem.LONGSWORD.name());
 		character.setOffHandArmament("NONE");
 
