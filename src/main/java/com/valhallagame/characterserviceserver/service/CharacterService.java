@@ -132,8 +132,8 @@ public class CharacterService {
 		character.setBeardItem("NONE");
     	character.setChestItem("HEAVY_HIDE_CHESTPIECE");
 		character.setHandsItem("NONE");
-		character.setLegsItem("REINFORCED_LEATHER_PANTS");
-		character.setFeetItem("FORTIFIED_BOOTS");
+        character.setLegsItem("WORN_RAGS");
+        character.setFeetItem("NONE");
 
 		character.setMainhandArmament(WardrobeItem.SWORD.name());
 		character.setOffHandArmament(WardrobeItem.MEDIUM_SHIELD.name());
@@ -149,8 +149,8 @@ public class CharacterService {
 		character.setBeardItem("NONE");
     	character.setChestItem("CLOTH_TUNIC");
 		character.setHandsItem("NONE");
-		character.setLegsItem("SILKEN_PANTS");
-		character.setFeetItem("APPRENTICES_BOOTS");
+        character.setLegsItem("WORN_RAGS");
+        character.setFeetItem("NONE");
 
 		character.setMainhandArmament(WardrobeItem.SWORD.name());
 		character.setOffHandArmament("NONE");
@@ -166,8 +166,8 @@ public class CharacterService {
 		character.setBeardItem("NONE");
 		character.setChestItem("RANGERS_HARNESS");
 		character.setHandsItem("NONE");
-		character.setLegsItem("LEATHER_BREECHES");
-		character.setFeetItem("LEATHER_BOOTS");
+        character.setLegsItem("WORN_RAGS");
+        character.setFeetItem("NONE");
 
 		character.setMainhandArmament(WardrobeItem.LONGSWORD.name());
 		character.setOffHandArmament("NONE");
