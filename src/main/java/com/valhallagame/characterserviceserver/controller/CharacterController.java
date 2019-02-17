@@ -40,7 +40,7 @@ public class CharacterController {
     @ResponseBody
     public ResponseEntity<JsonNode> getCharacterWithoutOwnerValidation(
             @Valid @RequestBody GetCharacterParameter input) {
-
+        logger.info("Get Character called with {}", input);
         Optional<Character> optCharacter = characterService.getCharacter(input.getCharacterName());
         if (!optCharacter.isPresent()) {
             return JS.message(HttpStatus.NOT_FOUND, "No character with that character name was found!");
@@ -51,6 +51,7 @@ public class CharacterController {
     @RequestMapping(path = "/get-owned-character", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<JsonNode> getCharacterWithOwner(@Valid @RequestBody GetOwnedCharacterParameter input) {
+        logger.info("Get Character called with {}", input);
         Optional<Character> optcharacter = characterService.getCharacter(input.getCharacterName());
         if (!optcharacter.isPresent()) {
             return JS.message(HttpStatus.NOT_FOUND, "No character with that character name was found!");
@@ -66,6 +67,7 @@ public class CharacterController {
     @RequestMapping(path = "/get-all-characters", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<JsonNode> getAllCharacters(@Valid @RequestBody GetAllCharactersParameter input) {
+        logger.info("Get All Character called with {}", input);
         return JS.message(HttpStatus.OK, characterService.getCharacters(input.getUsername()));
     }
 
@@ -73,6 +75,7 @@ public class CharacterController {
     @ResponseBody
     public ResponseEntity<JsonNode> createDebugCharacter(@Valid @RequestBody CreateDebugCharacterParameter input)
             throws IOException {
+        logger.info("Create Debug Character called with {}", input);
         String charName = input.getDisplayCharacterName().toLowerCase();
         Optional<Character> localOpt = characterService.getCharacter(charName);
         if (!localOpt.isPresent()) {
@@ -99,7 +102,7 @@ public class CharacterController {
     @ResponseBody
     public ResponseEntity<JsonNode> createCharacter(@Valid @RequestBody CreateCharacterParameter input)
             throws IOException {
-
+        logger.info("Create Character called with {}", input);
         String displayCharacterName = input.getDisplayCharacterName();
         if (displayCharacterName.contains("#")) {
             return JS.message(HttpStatus.BAD_REQUEST, "# is not allowed in character name");
@@ -116,6 +119,7 @@ public class CharacterController {
     @RequestMapping(path = "/delete-character", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<JsonNode> deleteCharacter(@Valid @RequestBody DeleteCharacterParameter input) {
+        logger.info("Delete Character called with {}", input);
         String owner = input.getUsername();
         Optional<Character> localOpt = characterService.getCharacter(input.getDisplayCharacterName().toLowerCase());
         if (!localOpt.isPresent()) {
@@ -149,6 +153,7 @@ public class CharacterController {
     @RequestMapping(path = "/character-available", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<JsonNode> characterAvailable(@Valid @RequestBody CharacterAvailableParameter input) {
+        logger.info("Character Available called with {}", input);
         if (input.getCharacterName() == null || input.getCharacterName().isEmpty()) {
             return JS.message(HttpStatus.BAD_REQUEST, "Missing characterName field");
         }
@@ -168,6 +173,7 @@ public class CharacterController {
     @RequestMapping(path = "/select-character", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<JsonNode> selectCharacter(@Valid @RequestBody SelectCharacterParameter input) {
+        logger.info("Select Character called with {}", input);
         String characterName = input.getDisplayCharacterName().toLowerCase();
         Optional<Character> localOpt = characterService.getCharacter(characterName);
         if (!localOpt.isPresent()) {
@@ -185,6 +191,7 @@ public class CharacterController {
     @RequestMapping(path = "/get-selected-character", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<JsonNode> getSelectedCharacter(@Valid @RequestBody GetSelectedCharacterParameter input) {
+        logger.info("Get Selected Character called with {}", input);
         Optional<Character> selectedCharacter = characterService.getSelectedCharacter(input.getUsername());
         if (selectedCharacter.isPresent()) {
             return JS.message(HttpStatus.OK, selectedCharacter.get());
@@ -196,8 +203,7 @@ public class CharacterController {
     @RequestMapping(path = "/save-equipped-items", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<JsonNode> saveEquippedItems(@Valid @RequestBody SaveEquippedItemsParameter input) {
-
-        logger.info("Saving equipment {}", input);
+        logger.info("Save Equipped Items called with {}", input);
 
         Optional<Character> selectedCharacterOpt = characterService.getCharacter(input.getCharacterName());
         if (selectedCharacterOpt.isPresent()) {
@@ -247,5 +253,4 @@ public class CharacterController {
                 break;
         }
     }
-
 }

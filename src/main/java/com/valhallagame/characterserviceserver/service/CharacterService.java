@@ -44,32 +44,39 @@ public class CharacterService {
     }
 
     public Character saveCharacter(Character character) {
+    	logger.info("Saving character: {}", character);
 		return characterRepository.save(character);
 	}
 
 	public Optional<Character> getCharacter(String characterName) {
+    	logger.info("Getting character with name: {}", characterName);
 		return characterRepository.findByCharacterName(characterName.toLowerCase());
 	}
 
 	public List<Character> getCharacters(String username) {
+    	logger.info("Getting characters for username: {}", username);
 		return characterRepository.findByOwnerUsername(username.toLowerCase());
 	}
 
 	public void setSelectedCharacter(String owner, String characterName) {
+    	logger.info("Setting selected character for user {} to {}", owner, characterName);
 		characterRepository.setSelectedCharacter(owner.toLowerCase(), characterName.toLowerCase());
 		rabbitTemplate.convertAndSend(RabbitMQRouting.Exchange.CHARACTER.name(),
 				RabbitMQRouting.Character.SELECT.name(), new NotificationMessage(owner, "Changed selected character"));
 	}
 
 	public Optional<Character> getSelectedCharacter(String owner) {
+    	logger.info("Getting selected character for user {}", owner);
 		return characterRepository.getSelectedCharacter(owner.toLowerCase());
 	}
 
 	public void deleteCharacter(Character local) {
+    	logger.info("Deleting character: {}", local);
 		characterRepository.delete(local);
 	}
 
 	public Character createCharacter(String username, String displayCharacterName, String startingClass) throws IOException {
+    	logger.info("Creating character for user {} with name {} and starting class {}", username, displayCharacterName, startingClass);
 		Character character = new Character();
 		character.setOwnerUsername(username);
 		character.setDisplayCharacterName(displayCharacterName);
@@ -175,7 +182,7 @@ public class CharacterService {
 		addTrait(characterName, TraitType.SHIELD_BREAKER);
 		addTrait(characterName, TraitType.HEMORRHAGE);
         addTrait(characterName, TraitType.GUNGNIRS_WRATH);
-		addTrait(characterName, TraitType.PARRY);
+		addTrait(characterName, TraitType.ONEHANDED_SPECIALIZATION);
 	}
 
 	private void addTrait(String characterName, TraitType traitType) throws IOException {
