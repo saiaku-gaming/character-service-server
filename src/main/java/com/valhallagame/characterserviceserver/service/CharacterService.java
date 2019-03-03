@@ -4,6 +4,7 @@ import com.valhallagame.characterserviceserver.model.Character;
 import com.valhallagame.characterserviceserver.repository.CharacterRepository;
 import com.valhallagame.common.rabbitmq.NotificationMessage;
 import com.valhallagame.common.rabbitmq.RabbitMQRouting;
+import com.valhallagame.common.rabbitmq.RabbitSender;
 import com.valhallagame.currencyserviceclient.CurrencyServiceClient;
 import com.valhallagame.currencyserviceclient.model.CurrencyType;
 import com.valhallagame.traitserviceclient.TraitServiceClient;
@@ -14,7 +15,6 @@ import com.valhallagame.traitserviceclient.message.UnlockTraitParameter;
 import com.valhallagame.wardrobeserviceclient.message.WardrobeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +27,7 @@ import java.util.Optional;
 public class CharacterService {
     private final CharacterRepository characterRepository;
 
-    private final RabbitTemplate rabbitTemplate;
+    private final RabbitSender rabbitSender;
 
     private final TraitServiceClient traitServiceClient;
 
@@ -36,9 +36,9 @@ public class CharacterService {
     private static Logger logger = LoggerFactory.getLogger(CharacterService.class);
 
     @Autowired
-    public CharacterService(CharacterRepository characterRepository, RabbitTemplate rabbitTemplate, TraitServiceClient traitServiceClient, CurrencyServiceClient currencyServiceClient) {
+    public CharacterService(CharacterRepository characterRepository, RabbitSender rabbitSender, TraitServiceClient traitServiceClient, CurrencyServiceClient currencyServiceClient) {
         this.characterRepository = characterRepository;
-        this.rabbitTemplate = rabbitTemplate;
+        this.rabbitSender = rabbitSender;
         this.traitServiceClient = traitServiceClient;
         this.currencyServiceClient = currencyServiceClient;
     }
@@ -61,7 +61,7 @@ public class CharacterService {
 	public void setSelectedCharacter(String owner, String characterName) {
     	logger.info("Setting selected character for user {} to {}", owner, characterName);
 		characterRepository.setSelectedCharacter(owner.toLowerCase(), characterName.toLowerCase());
-		rabbitTemplate.convertAndSend(RabbitMQRouting.Exchange.CHARACTER.name(),
+		rabbitSender.sendMessage(RabbitMQRouting.Exchange.CHARACTER,
 				RabbitMQRouting.Character.SELECT.name(), new NotificationMessage(owner, "Changed selected character"));
 	}
 
