@@ -7,9 +7,9 @@ import com.valhallagame.characterserviceserver.service.CharacterService;
 import com.valhallagame.common.JS;
 import com.valhallagame.common.rabbitmq.NotificationMessage;
 import com.valhallagame.common.rabbitmq.RabbitMQRouting;
+import com.valhallagame.common.rabbitmq.RabbitSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +34,7 @@ public class CharacterController {
     private CharacterService characterService;
 
     @Autowired
-    private RabbitTemplate rabbitTemplate;
+    private RabbitSender rabbitSender;
 
     @RequestMapping(path = "/get-character", method = RequestMethod.POST)
     @ResponseBody
@@ -141,7 +141,7 @@ public class CharacterController {
             NotificationMessage notificationMessage = new NotificationMessage(owner, "A character was deleted");
             notificationMessage.addData("characterName", local.getCharacterName());
 
-            rabbitTemplate.convertAndSend(RabbitMQRouting.Exchange.CHARACTER.name(),
+            rabbitSender.sendMessage(RabbitMQRouting.Exchange.CHARACTER,
                     RabbitMQRouting.Character.DELETE.name(), notificationMessage);
 
             return JS.message(HttpStatus.OK, "Deleted character");
