@@ -223,30 +223,39 @@ public class CharacterController {
         String armament = equippedItem.getArmament();
         String armor = equippedItem.getArmor();
         String itemSlot = equippedItem.getItemSlot();
+        String metaData = equippedItem.getMetaData();
         switch (itemSlot) {
             case "MAINHAND":
                 character.setMainhandArmament(armament);
+                character.setMainhandArmamentMetaData(metaData);
                 break;
             case "OFFHAND":
                 character.setOffHandArmament(armament);
+                character.setOffHandArmamentMetaData(metaData);
                 break;
             case "HEAD":
                 character.setHeadItem(armor);
+                character.setHeadItemMetaData(metaData);
                 break;
             case "BEARD":
                 character.setBeardItem(armor);
+                character.setBeardItemMetaData(metaData);
                 break;
             case "CHEST":
                 character.setChestItem(armor);
+                character.setChestItemMetaData(metaData);
                 break;
             case "HANDS":
                 character.setHandsItem(armor);
+                character.setHandsItemMetaData(metaData);
                 break;
             case "LEGS":
                 character.setLegsItem(armor);
+                character.setLegsItemMetaData(metaData);
                 break;
             case "FEET":
                 character.setFeetItem(armor);
+                character.setFeetItemMetaData(metaData);
                 break;
             default:
                 logger.error("{} DOES NOT EXIST AS A SLOT!", itemSlot);
