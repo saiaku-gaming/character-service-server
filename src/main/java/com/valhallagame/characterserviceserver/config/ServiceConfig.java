@@ -12,13 +12,13 @@ import org.springframework.context.annotation.Profile;
 public class ServiceConfig {
 	@Bean
 	public TraitServiceClient traitServiceClient() {
-		TraitServiceClient.init("http://trait-service.trait-service:" + DefaultServicePortMappings.TRAIT_SERVICE_PORT);
+		TraitServiceClient.init("http://trait-service:" + DefaultServicePortMappings.TRAIT_SERVICE_PORT);
 		return TraitServiceClient.get();
 	}
 
 	@Bean
 	public CurrencyServiceClient currencyServiceClient() {
-		CurrencyServiceClient.init("http://currency-service.currency-service:" + DefaultServicePortMappings.CURRENCY_SERVICE_PORT);
+		CurrencyServiceClient.init("http://currency-service:" + DefaultServicePortMappings.CURRENCY_SERVICE_PORT);
 		return CurrencyServiceClient.get();
 	}
 }
