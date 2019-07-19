@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>character-service-server</artifactId>
-	<version>1.18</version>
+	<version>1.19</version>
 	<packaging>jar</packaging>
 	<groupId>com.valhallagame.valhalla</groupId>
 	<name>Character Service Server</name>
@@ -94,7 +94,7 @@
 		<dependency>
 			<groupId>com.valhallagame.valhalla</groupId>
 			<artifactId>character-service-client</artifactId>
-            <version>1.9</version>
+            <version>1.10</version>
 		</dependency>
 		<dependency>
 			<groupId>com.valhallagame.valhalla</groupId>

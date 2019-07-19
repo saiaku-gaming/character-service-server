@@ -108,12 +108,11 @@ public class CharacterController {
             return JS.message(HttpStatus.BAD_REQUEST, "# is not allowed in character name");
         }
         Optional<Character> localOpt = characterService.getCharacter(displayCharacterName.toLowerCase());
-        if (!localOpt.isPresent()) {
-            characterService.createCharacter(input.getUsername(), input.getDisplayCharacterName(), input.getStartingClass());
-        } else {
+        if (localOpt.isPresent()) {
             return JS.message(HttpStatus.CONFLICT, "Character already exists.");
         }
-        return JS.message(HttpStatus.OK, "OK");
+        Character character = characterService.createCharacter(input.getUsername(), input.getDisplayCharacterName(), input.getStartingClass());
+        return JS.message(HttpStatus.OK, character);
     }
 
     @RequestMapping(path = "/delete-character", method = RequestMethod.POST)
