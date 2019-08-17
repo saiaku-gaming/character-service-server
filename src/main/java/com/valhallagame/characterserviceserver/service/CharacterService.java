@@ -1,5 +1,6 @@
 package com.valhallagame.characterserviceserver.service;
 
+import com.valhallagame.characterserviceclient.model.Items;
 import com.valhallagame.characterserviceserver.model.Character;
 import com.valhallagame.characterserviceserver.repository.CharacterRepository;
 import com.valhallagame.common.rabbitmq.NotificationMessage;
@@ -12,7 +13,6 @@ import com.valhallagame.traitserviceclient.message.AttributeType;
 import com.valhallagame.traitserviceclient.message.SkillTraitParameter;
 import com.valhallagame.traitserviceclient.message.TraitType;
 import com.valhallagame.traitserviceclient.message.UnlockTraitParameter;
-import com.valhallagame.wardrobeserviceclient.message.WardrobeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,8 +122,8 @@ public class CharacterService {
 		character.setLegsItem("REINFORCED_LEATHER_PANTS");
 		character.setFeetItem("FORTIFIED_BOOTS");
 
-		character.setMainhandArmament(WardrobeItem.SWORD.name());
-		character.setOffHandArmament(WardrobeItem.MEDIUM_SHIELD.name());
+		character.setMainhandArmament(Items.BLUNT_HAND_AXE.name());
+		character.setOffHandArmament(Items.CUMBERSOME_SMALL_SHIELD.name());
 
 		Arrays.stream(TraitType.values()).forEach(val -> {
 			try {
@@ -142,8 +142,8 @@ public class CharacterService {
         character.setLegsItem("WORN_RAGS");
         character.setFeetItem("NONE");
 
-		character.setMainhandArmament(WardrobeItem.SWORD.name());
-		character.setOffHandArmament(WardrobeItem.MEDIUM_SHIELD.name());
+		character.setMainhandArmament(Items.BLUNT_HAND_AXE.name());
+		character.setOffHandArmament(Items.CUMBERSOME_SMALL_SHIELD.name());
 
 		addTrait(characterName, TraitType.SHIELD_BASH);
 		addTrait(characterName, TraitType.RECOVER);
@@ -159,8 +159,8 @@ public class CharacterService {
         character.setLegsItem("WORN_RAGS");
         character.setFeetItem("NONE");
 
-		character.setMainhandArmament(WardrobeItem.SWORD.name());
-		character.setOffHandArmament("NONE");
+		character.setMainhandArmament(Items.BLUNT_HAND_AXE.name());
+		character.setOffHandArmament(Items.CUMBERSOME_SMALL_SHIELD.name());
 
 		addTrait(characterName, TraitType.FROST_BLAST);
 		addTrait(characterName, TraitType.SEIDHRING);
@@ -176,8 +176,8 @@ public class CharacterService {
         character.setLegsItem("WORN_RAGS");
         character.setFeetItem("NONE");
 
-		character.setMainhandArmament(WardrobeItem.LONGSWORD.name());
-		character.setOffHandArmament("NONE");
+		character.setMainhandArmament(Items.BLUNT_HAND_AXE.name());
+		character.setOffHandArmament(Items.CUMBERSOME_SMALL_SHIELD.name());
 
 		addTrait(characterName, TraitType.SHIELD_BREAKER);
 		addTrait(characterName, TraitType.HEMORRHAGE);
