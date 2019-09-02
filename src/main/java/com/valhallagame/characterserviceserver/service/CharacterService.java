@@ -202,7 +202,7 @@ public class CharacterService {
 		recipeServiceClient.addRecipe(characterName, "LONGSWORD");
 		recipeServiceClient.addRecipe(characterName, "DAGGER");
 		recipeServiceClient.addRecipe(characterName, "WARHAMMER");
-		recipeServiceClient.addRecipe(characterName, "GREATEAXE");
+		recipeServiceClient.addRecipe(characterName, "GREATAXE");
 		recipeServiceClient.addRecipe(characterName, "SMALL_SHIELD");
 		recipeServiceClient.addRecipe(characterName, "MEDIUM_SHIELD");
 		recipeServiceClient.addRecipe(characterName, "LARGE_SHIELD");
