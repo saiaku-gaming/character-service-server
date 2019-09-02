@@ -110,7 +110,6 @@ public class CharacterService {
 		}
 
 		addTrait(characterName, TraitType.DODGE);
-		addDefaultRecipes(characterName);
 		SkillTraitParameter skillTraitParameter = new SkillTraitParameter(characterName, TraitType.DODGE, AttributeType.AGILITY, 0);
 		traitServiceClient.skillTrait(skillTraitParameter);
 
@@ -118,6 +117,7 @@ public class CharacterService {
 
 		character = saveCharacter(character);
 		setSelectedCharacter(character.getOwnerUsername(), character.getCharacterName());
+		addDefaultRecipes(characterName);
 		return character;
 	}
 
