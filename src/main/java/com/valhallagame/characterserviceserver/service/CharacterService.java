@@ -7,6 +7,7 @@ import com.valhallagame.common.rabbitmq.RabbitMQRouting;
 import com.valhallagame.common.rabbitmq.RabbitSender;
 import com.valhallagame.currencyserviceclient.CurrencyServiceClient;
 import com.valhallagame.currencyserviceclient.model.CurrencyType;
+import com.valhallagame.recipeserviceclient.RecipeServiceClient;
 import com.valhallagame.traitserviceclient.TraitServiceClient;
 import com.valhallagame.traitserviceclient.message.AttributeType;
 import com.valhallagame.traitserviceclient.message.SkillTraitParameter;
@@ -33,14 +34,19 @@ public class CharacterService {
 
     private final CurrencyServiceClient currencyServiceClient;
 
+    private final RecipeServiceClient recipeServiceClient;
+
     private static Logger logger = LoggerFactory.getLogger(CharacterService.class);
 
     @Autowired
-    public CharacterService(CharacterRepository characterRepository, RabbitSender rabbitSender, TraitServiceClient traitServiceClient, CurrencyServiceClient currencyServiceClient) {
+    public CharacterService(CharacterRepository characterRepository, RabbitSender rabbitSender,
+							TraitServiceClient traitServiceClient, CurrencyServiceClient currencyServiceClient,
+							RecipeServiceClient recipeServiceClient) {
         this.characterRepository = characterRepository;
         this.rabbitSender = rabbitSender;
         this.traitServiceClient = traitServiceClient;
         this.currencyServiceClient = currencyServiceClient;
+        this.recipeServiceClient = recipeServiceClient;
     }
 
     public Character saveCharacter(Character character) {
@@ -104,6 +110,7 @@ public class CharacterService {
 		}
 
 		addTrait(characterName, TraitType.DODGE);
+		addDefaultRecipes(characterName);
 		SkillTraitParameter skillTraitParameter = new SkillTraitParameter(characterName, TraitType.DODGE, AttributeType.AGILITY, 0);
 		traitServiceClient.skillTrait(skillTraitParameter);
 
@@ -187,6 +194,21 @@ public class CharacterService {
 
 	private void addTrait(String characterName, TraitType traitType) throws IOException {
 		traitServiceClient.unlockTrait(new UnlockTraitParameter(characterName, traitType));
+	}
+
+	private void addDefaultRecipes(String characterName) throws IOException {
+		recipeServiceClient.addRecipe(characterName, "SWORD");
+		recipeServiceClient.addRecipe(characterName, "HAND_AXE");
+		recipeServiceClient.addRecipe(characterName, "LONGSWORD");
+		recipeServiceClient.addRecipe(characterName, "DAGGER");
+		recipeServiceClient.addRecipe(characterName, "WARHAMMER");
+		recipeServiceClient.addRecipe(characterName, "GREATEAXE");
+		recipeServiceClient.addRecipe(characterName, "SMALL_SHIELD");
+		recipeServiceClient.addRecipe(characterName, "MEDIUM_SHIELD");
+		recipeServiceClient.addRecipe(characterName, "LARGE_SHIELD");
+		recipeServiceClient.addRecipe(characterName, "STEEL_SHIELD");
+		recipeServiceClient.addRecipe(characterName, "TORCH");
+		recipeServiceClient.addRecipe(characterName, "HUNTING_BOW");
 	}
 
 	private enum AllowedClasses {
