@@ -199,66 +199,29 @@ public class CharacterController {
         }
     }
 
-    @RequestMapping(path = "/save-equipped-items", method = RequestMethod.POST)
+    @RequestMapping(path = "/equip-item", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<JsonNode> saveEquippedItems(@Valid @RequestBody SaveEquippedItemsParameter input) {
-        logger.info("Save Equipped Items called with {}", input);
+    public ResponseEntity<JsonNode> equipItem(@Valid @RequestBody EquipItemParameter input) {
+        logger.info("Equip Item called with {}", input);
 
-        Optional<Character> selectedCharacterOpt = characterService.getCharacter(input.getCharacterName());
-        if (selectedCharacterOpt.isPresent()) {
-            Character character = selectedCharacterOpt.get();
-
-            for (EquippedItemParameter equippedItem : input.getEquippedItems()) {
-                equippCharacter(character, equippedItem);
-            }
-            Character saveCharacter = characterService.saveCharacter(character);
-            return JS.message(HttpStatus.OK, saveCharacter);
+        Character character = characterService.equipItem(input.getCharacterName(), input.getItemToEquip());
+        if (character != null) {
+            return JS.message(HttpStatus.OK, character);
         } else {
-            return JS.message(HttpStatus.NOT_FOUND, "No character with that id");
+            return JS.message(HttpStatus.NOT_FOUND, "No character with that character name");
         }
     }
 
-    private void equippCharacter(Character character, EquippedItemParameter equippedItem) {
-        String armament = equippedItem.getArmament();
-        String armor = equippedItem.getArmor();
-        String itemSlot = equippedItem.getItemSlot();
-        String metaData = equippedItem.getMetaData();
-        switch (itemSlot) {
-            case "MAINHAND":
-                character.setMainhandArmament(armament);
-                character.setMainhandArmamentMetaData(metaData);
-                break;
-            case "OFFHAND":
-                character.setOffHandArmament(armament);
-                character.setOffHandArmamentMetaData(metaData);
-                break;
-            case "HEAD":
-                character.setHeadItem(armor);
-                character.setHeadItemMetaData(metaData);
-                break;
-            case "BEARD":
-                character.setBeardItem(armor);
-                character.setBeardItemMetaData(metaData);
-                break;
-            case "CHEST":
-                character.setChestItem(armor);
-                character.setChestItemMetaData(metaData);
-                break;
-            case "HANDS":
-                character.setHandsItem(armor);
-                character.setHandsItemMetaData(metaData);
-                break;
-            case "LEGS":
-                character.setLegsItem(armor);
-                character.setLegsItemMetaData(metaData);
-                break;
-            case "FEET":
-                character.setFeetItem(armor);
-                character.setFeetItemMetaData(metaData);
-                break;
-            default:
-                logger.error("{} DOES NOT EXIST AS A SLOT!", itemSlot);
-                break;
+    @RequestMapping(path = "/unequip-item", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<JsonNode> unequipItem(@Valid @RequestBody UnequipItemParameter input) {
+        logger.info("Unequip Item called with {}", input);
+
+        Character character = characterService.unequipItem(input.getCharacterName(), input.getItemSlot());
+        if (character != null) {
+            return JS.message(HttpStatus.OK, character);
+        } else {
+            return JS.message(HttpStatus.NOT_FOUND, "No character with that character name");
         }
     }
 }

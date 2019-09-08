@@ -1,5 +1,6 @@
 package com.valhallagame.characterserviceserver.service;
 
+import com.valhallagame.characterserviceclient.message.EquippedItemParameter;
 import com.valhallagame.characterserviceclient.model.Items;
 import com.valhallagame.characterserviceserver.model.Character;
 import com.valhallagame.characterserviceserver.repository.CharacterRepository;
@@ -121,6 +122,36 @@ public class CharacterService {
 		return character;
 	}
 
+	public Character equipItem(String characterName, EquippedItemParameter itemToEquip) {
+		logger.info("Equip item for character {} with {}", characterName, itemToEquip);
+		Optional<Character> optCharacter = getCharacter(characterName);
+
+		if(!optCharacter.isPresent()) {
+			return null;
+		}
+
+		Character character = optCharacter.get();
+
+		equipCharacter(character, itemToEquip);
+
+		return saveCharacter(character);
+	}
+
+	public Character unequipItem(String characterName, String itemSlot) {
+		logger.info("Unequip item for character {} with {}", characterName, itemSlot);
+		Optional<Character> optCharacter = getCharacter(characterName);
+
+		if(!optCharacter.isPresent()) {
+			return null;
+		}
+
+		Character character = optCharacter.get();
+
+		unequipCharacter(character, itemSlot);
+
+		return saveCharacter(character);
+	}
+
 	private void equipAsDebug(Character character, String characterName) {
 		character.setHeadItem("NONE");
 		character.setBeardItem("NONE");
@@ -228,6 +259,89 @@ public class CharacterService {
 			} catch (IllegalArgumentException e){
 				return false;
 			}
+		}
+	}
+
+	public void equipCharacter(Character character, EquippedItemParameter equippedItem) {
+		String item = equippedItem.getItem();
+		String itemSlot = equippedItem.getItemSlot();
+		String metaData = equippedItem.getMetaData();
+		switch (itemSlot) {
+			case "MAINHAND":
+				character.setMainhandArmament(item);
+				character.setMainhandArmamentMetaData(metaData);
+				break;
+			case "OFFHAND":
+				character.setOffHandArmament(item);
+				character.setOffHandArmamentMetaData(metaData);
+				break;
+			case "HEAD":
+				character.setHeadItem(item);
+				character.setHeadItemMetaData(metaData);
+				break;
+			case "BEARD":
+				character.setBeardItem(item);
+				character.setBeardItemMetaData(metaData);
+				break;
+			case "CHEST":
+				character.setChestItem(item);
+				character.setChestItemMetaData(metaData);
+				break;
+			case "HANDS":
+				character.setHandsItem(item);
+				character.setHandsItemMetaData(metaData);
+				break;
+			case "LEGS":
+				character.setLegsItem(item);
+				character.setLegsItemMetaData(metaData);
+				break;
+			case "FEET":
+				character.setFeetItem(item);
+				character.setFeetItemMetaData(metaData);
+				break;
+			default:
+				logger.error("{} DOES NOT EXIST AS A SLOT!", itemSlot);
+				break;
+		}
+	}
+
+	public void unequipCharacter(Character character, String itemSlot) {
+		switch (itemSlot) {
+			case "MAINHAND":
+				character.setMainhandArmament("None");
+				character.setMainhandArmamentMetaData(null);
+				break;
+			case "OFFHAND":
+				character.setOffHandArmament("None");
+				character.setOffHandArmamentMetaData(null);
+				break;
+			case "HEAD":
+				character.setHeadItem("None");
+				character.setHeadItemMetaData(null);
+				break;
+			case "BEARD":
+				character.setBeardItem("None");
+				character.setBeardItemMetaData(null);
+				break;
+			case "CHEST":
+				character.setChestItem("None");
+				character.setChestItemMetaData(null);
+				break;
+			case "HANDS":
+				character.setHandsItem("None");
+				character.setHandsItemMetaData(null);
+				break;
+			case "LEGS":
+				character.setLegsItem("None");
+				character.setLegsItemMetaData(null);
+				break;
+			case "FEET":
+				character.setFeetItem("None");
+				character.setFeetItemMetaData(null);
+				break;
+			default:
+				logger.error("{} DOES NOT EXIST AS A SLOT!", itemSlot);
+				break;
 		}
 	}
 }
