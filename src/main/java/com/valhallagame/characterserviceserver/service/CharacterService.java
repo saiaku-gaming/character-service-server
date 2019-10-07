@@ -108,6 +108,8 @@ public class CharacterService {
 		}
 
 		unlockTrait(characterName, TraitType.DODGE);
+		purchaseTrait(characterName, TraitType.DODGE);
+		
 		unlockTrait(characterName, TraitType.SHIELD_BREAKER);
 		unlockTrait(characterName, TraitType.HEMORRHAGE);
 		unlockTrait(characterName, TraitType.GUNGNIRS_WRATH);
