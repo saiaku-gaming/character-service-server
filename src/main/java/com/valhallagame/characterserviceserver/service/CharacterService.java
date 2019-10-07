@@ -11,10 +11,7 @@ import com.valhallagame.currencyserviceclient.CurrencyServiceClient;
 import com.valhallagame.currencyserviceclient.model.CurrencyType;
 import com.valhallagame.recipeserviceclient.RecipeServiceClient;
 import com.valhallagame.traitserviceclient.TraitServiceClient;
-import com.valhallagame.traitserviceclient.message.AttributeType;
-import com.valhallagame.traitserviceclient.message.SkillTraitParameter;
-import com.valhallagame.traitserviceclient.message.TraitType;
-import com.valhallagame.traitserviceclient.message.UnlockTraitParameter;
+import com.valhallagame.traitserviceclient.message.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,7 +107,20 @@ public class CharacterService {
 				break;
 		}
 
-		addTrait(characterName, TraitType.DODGE);
+		unlockTrait(characterName, TraitType.DODGE);
+		unlockTrait(characterName, TraitType.SHIELD_BREAKER);
+		unlockTrait(characterName, TraitType.HEMORRHAGE);
+		unlockTrait(characterName, TraitType.GUNGNIRS_WRATH);
+		unlockTrait(characterName, TraitType.ONEHANDED_SPECIALIZATION);
+		unlockTrait(characterName, TraitType.FROST_BLAST);
+		unlockTrait(characterName, TraitType.SEIDHRING);
+		unlockTrait(characterName, TraitType.PETRIFY);
+		unlockTrait(characterName, TraitType.FRIGGS_INTERVENTION);
+		unlockTrait(characterName, TraitType.SHIELD_BASH);
+		unlockTrait(characterName, TraitType.RECOVER);
+		unlockTrait(characterName, TraitType.TAUNT);
+		unlockTrait(characterName, TraitType.KICK);
+
 		SkillTraitParameter skillTraitParameter = new SkillTraitParameter(characterName, TraitType.DODGE, AttributeType.AGILITY, 0);
 		traitServiceClient.skillTrait(skillTraitParameter);
 
@@ -165,7 +175,7 @@ public class CharacterService {
 
 		Arrays.stream(TraitType.values()).forEach(val -> {
 			try {
-				addTrait(characterName, val);
+				unlockTrait(characterName, val);
 			} catch (IOException e) {
 				logger.error("failed to populate debug character with " + val, e);
 			}
@@ -183,10 +193,10 @@ public class CharacterService {
 		character.setMainhandArmament(Items.BLUNT_HAND_AXE.name());
 		character.setOffHandArmament(Items.CUMBERSOME_SMALL_SHIELD.name());
 
-		addTrait(characterName, TraitType.SHIELD_BASH);
-		addTrait(characterName, TraitType.RECOVER);
-		addTrait(characterName, TraitType.TAUNT);
-		addTrait(characterName, TraitType.KICK);
+		purchaseTrait(characterName, TraitType.SHIELD_BASH);
+		purchaseTrait(characterName, TraitType.RECOVER);
+		purchaseTrait(characterName, TraitType.TAUNT);
+		purchaseTrait(characterName, TraitType.KICK);
 	}
 
 	private void equipAsShaman(Character character, String characterName) throws IOException {
@@ -200,10 +210,10 @@ public class CharacterService {
 		character.setMainhandArmament(Items.BLUNT_HAND_AXE.name());
 		character.setOffHandArmament(Items.CUMBERSOME_SMALL_SHIELD.name());
 
-		addTrait(characterName, TraitType.FROST_BLAST);
-		addTrait(characterName, TraitType.SEIDHRING);
-		addTrait(characterName, TraitType.PETRIFY);
-		addTrait(characterName, TraitType.FRIGGS_INTERVENTION);
+		purchaseTrait(characterName, TraitType.FROST_BLAST);
+		purchaseTrait(characterName, TraitType.SEIDHRING);
+		purchaseTrait(characterName, TraitType.PETRIFY);
+		purchaseTrait(characterName, TraitType.FRIGGS_INTERVENTION);
 	}
 
 	private void equipAsRanger(Character character, String characterName) throws IOException {
@@ -217,14 +227,18 @@ public class CharacterService {
 		character.setMainhandArmament(Items.BLUNT_HAND_AXE.name());
 		character.setOffHandArmament(Items.CUMBERSOME_SMALL_SHIELD.name());
 
-		addTrait(characterName, TraitType.SHIELD_BREAKER);
-		addTrait(characterName, TraitType.HEMORRHAGE);
-        addTrait(characterName, TraitType.GUNGNIRS_WRATH);
-		addTrait(characterName, TraitType.ONEHANDED_SPECIALIZATION);
+		purchaseTrait(characterName, TraitType.SHIELD_BREAKER);
+		purchaseTrait(characterName, TraitType.HEMORRHAGE);
+		purchaseTrait(characterName, TraitType.GUNGNIRS_WRATH);
+		purchaseTrait(characterName, TraitType.ONEHANDED_SPECIALIZATION);
 	}
 
-	private void addTrait(String characterName, TraitType traitType) throws IOException {
+	private void unlockTrait(String characterName, TraitType traitType) throws IOException {
 		traitServiceClient.unlockTrait(new UnlockTraitParameter(characterName, traitType));
+	}
+
+	private void purchaseTrait(String characterName, TraitType traitType) throws IOException {
+		traitServiceClient.purchaseTrait(new PurchaseTraitParameter(characterName, traitType));
 	}
 
 	private void addDefaultRecipes(String characterName) throws IOException {
