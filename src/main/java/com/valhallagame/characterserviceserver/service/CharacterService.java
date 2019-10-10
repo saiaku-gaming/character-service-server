@@ -92,6 +92,22 @@ public class CharacterService {
 			return null;
 		}
 
+		unlockTrait(characterName, TraitType.DODGE);
+		purchaseTrait(characterName, TraitType.DODGE);
+
+		unlockTrait(characterName, TraitType.SHIELD_BREAKER);
+		unlockTrait(characterName, TraitType.HEMORRHAGE);
+		unlockTrait(characterName, TraitType.GUNGNIRS_WRATH);
+		unlockTrait(characterName, TraitType.ONEHANDED_SPECIALIZATION);
+		unlockTrait(characterName, TraitType.FROST_BLAST);
+		unlockTrait(characterName, TraitType.SEIDHRING);
+		unlockTrait(characterName, TraitType.PETRIFY);
+		unlockTrait(characterName, TraitType.FRIGGS_INTERVENTION);
+		unlockTrait(characterName, TraitType.SHIELD_BASH);
+		unlockTrait(characterName, TraitType.RECOVER);
+		unlockTrait(characterName, TraitType.TAUNT);
+		unlockTrait(characterName, TraitType.KICK);
+
 		switch (AllowedClasses.get(startingClass)) {
 			case WARRIOR:
 				equipAsWarrior(character, characterName);
@@ -106,22 +122,6 @@ public class CharacterService {
 				equipAsDebug(character, characterName);
 				break;
 		}
-
-		unlockTrait(characterName, TraitType.DODGE);
-		purchaseTrait(characterName, TraitType.DODGE);
-		
-		unlockTrait(characterName, TraitType.SHIELD_BREAKER);
-		unlockTrait(characterName, TraitType.HEMORRHAGE);
-		unlockTrait(characterName, TraitType.GUNGNIRS_WRATH);
-		unlockTrait(characterName, TraitType.ONEHANDED_SPECIALIZATION);
-		unlockTrait(characterName, TraitType.FROST_BLAST);
-		unlockTrait(characterName, TraitType.SEIDHRING);
-		unlockTrait(characterName, TraitType.PETRIFY);
-		unlockTrait(characterName, TraitType.FRIGGS_INTERVENTION);
-		unlockTrait(characterName, TraitType.SHIELD_BASH);
-		unlockTrait(characterName, TraitType.RECOVER);
-		unlockTrait(characterName, TraitType.TAUNT);
-		unlockTrait(characterName, TraitType.KICK);
 
 		SkillTraitParameter skillTraitParameter = new SkillTraitParameter(characterName, TraitType.DODGE, AttributeType.AGILITY, 0);
 		traitServiceClient.skillTrait(skillTraitParameter);
